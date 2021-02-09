@@ -1,0 +1,616 @@
+Ag:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 17
+Al:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 7.0
+  valence: 3
+Ar:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 9.0
+  valence: 8
+As:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+Au:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 17
+B:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 7.0
+  valence: 3
+Ba:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 10.0
+  valence: 10
+Be:
+  config:
+  - 3
+  - 2
+  - 1
+  - 0
+  rcut: 7.0
+  valence: 2
+Bi:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 15
+Br:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 7
+C:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 6.0
+  valence: 4
+Ca:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 9.0
+  valence: 10
+Cd:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 12
+Ce:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 12
+Cl:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 7
+Co:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 15
+Cr:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 14
+Cs:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 12.0
+  valence: 9
+Cu:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 11
+Dy:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 20
+F:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 7
+Fe:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 14
+Ga:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 13
+Ge:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 4
+H:
+  config:
+  - 2
+  - 2
+  - 1
+  - 0
+  rcut: 7.0
+  valence: 1
+He:
+  config:
+  - 2
+  - 2
+  - 1
+  - 0
+  rcut: 10.0
+  valence: 2
+Hf:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 9.0
+  valence: 12
+Hg:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 18
+Ho:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 21
+I:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 7
+In:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 13
+Ir:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+K:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 10.0
+  valence: 9
+Kr:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 10.0
+  valence: 8
+La:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 11
+Li:
+  config:
+  - 3
+  - 2
+  - 1
+  - 0
+  rcut: 8.0
+  valence: 3
+Lu:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 11
+Mg:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 9.0
+  valence: 8
+Mn:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 15
+Mo:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 14
+N:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 6.0
+  valence: 5
+Na:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 9.0
+  valence: 9
+Nb:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 13
+Nd:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 14
+Ne:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 9.0
+  valence: 8
+Ni:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 16
+O:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 6.0
+  valence: 6
+Os:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 14
+P:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 5
+Pb:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 14
+Pd:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 16
+Pm:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 15
+Pr:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 13
+Pt:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 16
+Rb:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 11.0
+  valence: 9
+Re:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+Rh:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+Ru:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 14
+S:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 6
+Sb:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+Sc:
+  config:
+  - 3
+  - 2
+  - 2
+  - 0
+  rcut: 9.0
+  valence: 11
+Se:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 6
+Si:
+  config:
+  - 3
+  - 3
+  - 2
+  - 0
+  rcut: 7.0
+  valence: 4
+Sm:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 16
+Sn:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 14
+Sr:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 10.0
+  valence: 10
+Ta:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 13
+Tc:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 15
+Te:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 16
+Ti:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 12
+Tl:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 8.0
+  valence: 19
+V:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 13
+W:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 12
+Xe:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 11.0
+  valence: 8
+Y:
+  config:
+  - 3
+  - 3
+  - 2
+  - 1
+  rcut: 10.0
+  valence: 11
+Zn:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 6.0
+  valence: 12
+Zr:
+  config:
+  - 3
+  - 2
+  - 2
+  - 1
+  rcut: 7.0
+  valence: 12
