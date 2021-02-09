@@ -9,6 +9,8 @@
 .coverage
 .pytest_cache
 .vscode
+.vscode/
 build/
 dist/
+play/
 pip-wheel-metadata/
