@@ -1,38 +1,36 @@
 import typing as ty
 import numpy as np
 
-class _BlockParameter:
-    def __init__(self, tag, data, formatter):
-        self.tag = tag
-        self.data = data
-        self.formatter = formatter
-
-    def __str__(self):
-        return self.formatter(self.tag, self.data)
-
-
+# All of the parameters which appear in the OpenMX 3.9.2 input parser source
+# code (Input_std.c). Parameters which are not currently targeted/supported by
+# aiida-openmx are commented out. Where possible, the type, default value,
+# options, dimensions, range, and other information about each of the parameters
+# is recorded; however, this information may be incomplete! 
 PARAMETERS = {
     'System.CurrentDirectory': {
-         'type': str,
-        'default': './'
+        'type': str,
+        'default': './',
+        'required': True
     },
     'System.Name': {
         'type': str,
-        'default': 'default'
+        'default': 'default',
+        'required': True
     },
     'DATA.PATH': {
         'type': str,
-        'default': '../DFT_DATA19'
+        'default': '../DFT_DATA19',
+        'required': True
     },
     'level.of.stdout': {
         'type': int,
         'default': 1,
-        'lims': (1, 3)
+        'lims': (0, 3)  # (1->3 incl.)
     },
     'level.of.fileout': {
         'type': int,
         'default': 1,
-        'lims': (0, 3)
+        'lims': (-1, 3)  # (0->3 incl.)
     },
     # 'memory.usage.fileout': {
     #     'type': bool,
@@ -60,12 +58,13 @@ PARAMETERS = {
     #     'default': False
     # },
     'scf.Ngrid': {
-        'type': ty.Iterable[int],
-        'default': (0, 0, 0),
-        'dims': (3,)
+        'type': ty.Iterable,
+        # 'default': (0, 0, 0),
+        'shape': (3,)
     },
     'Species.Number': {
         'type': int,
+        'required': True
     },
     # 'scf.Hubbard.U': {
     #     'type': bool,
@@ -112,18 +111,19 @@ PARAMETERS = {
     #     'default': 'OFF',
     #     'options': ('OFF', 'Atoms', 'Species', 'Atoms2', 'Species2')
     # },
-    'Definition.of.Atomic.Species': {},                                   # TODO
+    'Definition.of.Atomic.Species': {
+        'type': str,
+        'block': True,
+        'required': True
+    },
     'MD.Type': {
-        'type':
-        str,
-        'default':
-        'NOMD',
-        'options':
-        ('NOMD', 'NVE', 'NVT_VS', 'Opt', 'EF', 'BFGS', 'RF', 'DIIS', 'NVT_NH',
-         'Opt_LBFGS', 'NVT_VS2', 'EvsLC', 'NEB', 'NVT_VS4', 'NVT_Langevin',
-         'DF', 'OptC1', 'OptC2', 'OptC3', 'OptC4', 'OptC5', 'RFC1', 'RFC2',
-         'RFC3', 'RFC4', 'RFC5', 'NPT_VS_PR', 'NPT_VS_WV', 'NPT_NH_PR',
-         'NPT_NH_WV', 'RFC6', 'RFC7', 'OptC6', 'OptC7'),
+        'type': str,
+        'default': 'NOMD',
+        'options': ('NOMD', 'NVE', 'NVT_VS', 'Opt', 'EF', 'BFGS', 'RF', 'DIIS',
+            'NVT_NH', 'Opt_LBFGS', 'NVT_VS2', 'EvsLC', 'NEB', 'NVT_VS4',
+            'NVT_Langevin', 'DF', 'OptC1', 'OptC2', 'OptC3', 'OptC4', 'OptC5',
+            'RFC1', 'RFC2', 'RFC3', 'RFC4', 'RFC5', 'NPT_VS_PR', 'NPT_VS_WV',
+            'NPT_NH_PR', 'NPT_NH_WV', 'RFC6', 'RFC7', 'OptC6', 'OptC7')
     },
     'MD.maxIter': {  # Note: must be 7 if MD.Type == 'DF' (delta-factor)
         'type': int,
@@ -142,12 +142,14 @@ PARAMETERS = {
     },
     'MD.Opt.criterion': {
         'type': float,
-        'default': 0.0003
+        'default': 0.0003,
+        'lims': (0., np.inf)
+        # unit?
     },
     'MD.Opt.DIIS.History': {
         'type': int,
         'default': 3,
-        'lims': (0, 19)  # Not sure if 0 is a lower limit
+        'lims': (0, 19)  # Not sure if 1 is a lower limit
     },
     'MD.Opt.StartDIIS': {
         'type': int,
@@ -164,7 +166,7 @@ PARAMETERS = {
     # 'MD.EvsLC.flag': {
     #     'type': ty.Iterable[int],
     #     'default': (1, 1, 1),
-    #     'dims': (3, )
+    #     'shape': (3, )
     # },
     # 'MD.Out.ABC': {
     #     'type': bool,
@@ -207,12 +209,10 @@ PARAMETERS = {
     #     False  # set to True if scf.EigenvalueSolver in ['DC-LNO', 'Cluster-LNO']
     # },
     'scf.EigenvalueSolver': {
-        'type':
-        str,
-        'default':
-        'Band',  # AZ: I think this is best as the default
+        'type': str,
+        'default': 'Band',  # AZ: I think this is best as the default
         'options': ('Cluster', 'Band', 'NEGF', 'DC', 'Cluster-DIIS',
-                      'Krylov', 'Cluster2', 'EGAC', 'DC-LNO', 'Cluster-LNO')
+            'Krylov', 'Cluster2', 'EGAC', 'DC-LNO', 'Cluster-LNO')
     },
     # 'scf.lapack.dste': {
     #     'type': str,
@@ -248,7 +248,8 @@ PARAMETERS = {
     'scf.XcType': {
         'type': str,
         'default': 'LDA',
-        'options': ('LDA', 'LSDA-CA', 'LSDA-PW', 'GGA-PBE', 'EXX-TEST')
+        'options': ('LDA', 'LSDA-CA', 'LSDA-PW', 'GGA-PBE', 'EXX-TEST'),
+        'required': True
     },
     # 'scf.SpinPolarization': {
     #     'type': str,
@@ -299,10 +300,11 @@ PARAMETERS = {
     #     'unit': 'T'
     # },
     'scf.Kgrid': {
-        'type': ty.Iterable[int],
+        'type': ty.Iterable,
         'default': (4, 4, 4),
-        'dim': (3,),
-        'lims': (1, np.inf)
+        'shape': (3,),
+        'lims': (0., np.inf),
+        'required': True
     },
     'scf.ElectronicTemperature': {
         'type': float,
@@ -353,7 +355,7 @@ PARAMETERS = {
     'scf.criterion': {
         'type': float,
         'default': 1e-6,
-        'lims': (0, np.inf)
+        'lims': (0., np.inf)
     },
     # 'scf.system.charge': {
     #     'type': float,
@@ -411,20 +413,31 @@ PARAMETERS = {
     #     'default': False
     # },
     'Atoms.Number': {
-        'type': int
+        'type': int,
+        'required': True
     },
     'Atoms.SpeciesAndCoordinates.Unit': {
         'type': str,
         'default': 'Ang',
-        'options': ('Ang', 'AU', 'FRAC')
+        'options': ('Ang', 'AU', 'FRAC'),
+        'required': True
     },
-    'Atoms.SpeciesAndCoordinates': {},                                    # TODO
+    'Atoms.SpeciesAndCoordinates': {
+        'type': str,
+        'block': True,
+        'required': True
+    },
     'Atoms.Unitvectors.Unit': {
         'type': str,
         'default': 'Ang',
-        'options': ('Ang', 'AU')
+        'options': ('Ang', 'AU'),
+        'required': True
     },
-    'Atoms.Unitvectors': {},                                              # TODO
+    'Atoms.Unitvectors': {
+        'type': str,
+        'block': True,
+        'required': True
+    },
     # 'Atoms.Unitvectors.Velocity': {},
     # 'orderN.LNO.Occ.Cutoff': {},
     # 'orderN.LNO.Buffer': {},
@@ -471,7 +484,7 @@ PARAMETERS = {
     'scf.maxIter': {
         'type': int,
         'default': 40,
-        'lims': (1, np.inf)
+        'lims': (0, np.inf)
     },
     # 'scf.Npoles.ON2': {},
     # 'scf.Npoles.EGAC': {},
@@ -509,8 +522,14 @@ PARAMETERS = {
         'type': int,
         'default': 0
     },
-    'Band.kpath.UnitCell': {},                                            # TODO
-    'Band.kpath': {},                                                     # TODO
+    'Band.kpath.UnitCell': {
+        'type': str,
+        'block': True
+    },
+    'Band.kpath': {
+        'type': str,
+        'block': True,
+    },
     '1DFFT.NumGridK': {
         'type': int,
         'default': 900
@@ -606,15 +625,15 @@ PARAMETERS = {
         'default': False
     },
     'Dos.Erange': {
-        'type': ty.Iterable[float],
+        'type': ty.Iterable,
         'default': (-20., 20.),
-        'dim': (2,),
+        'shape': (2,),
         'unit': 'eV'
     },
     'Dos.Kgrid': {
-        'type': ty.Iterable[int],
+        'type': ty.Iterable,
         'default': (4, 4, 4),  # k-grid
-        'dim': (3,)
+        'shape': (3,)
     },
     # 'partial.charge': {},
     # 'partial.charge.energy.window': {},
@@ -658,3 +677,15 @@ PARAMETERS = {
     # 'MD.applied.pressure.flag': {},
     # 'Population.Analysis.AO.Wanniers': {}
 }
+
+# These keywords are reserved as they are set automatically by aiida-openmx
+# code.
+RESERVED_KEYWORDS = [
+    'System.CurrentDirectory', 'System.Name', 'DATA.PATH', 'level.of.stdout',
+    'level.of.fileout', 'Species.Number', 'Definition.of.Atomic.Species',
+    'scf.XcType', 'scf.Kgrid', 'Atoms.Number',
+    'Atoms.SpeciesAndCoordinates.Unit', 'Atoms.SpeciesAndCoordinates',
+    'Atoms.Unitvectors.Unit', 'Atoms.Unitvectors', 'Atoms.NetCharge',
+    'scf.restart', 'scf.restart.filename', 'Dos.fileout', 'DosGauss.fileout',
+    'FermiSurfer.fileout', 'HS.fileout'
+]
