@@ -52,7 +52,7 @@ PARAMETERS = {
     'scf.Ngrid': {
         'type': ty.Iterable[int],
         'default': (0, 0, 0),
-        'dims': (3,)
+        'dims': (3, )
     },
     'Species.Number': {
         'type': int,
@@ -105,14 +105,16 @@ PARAMETERS = {
     },
     'Definition.of.Atomic.Species': {},
     'MD.Type': {
-        'type': str,
-        'default': 'NOMD',
-        'available': (
-            'NOMD', 'NVE', 'NVT_VS', 'Opt', 'EF', 'BFGS', 'RF', 'DIIS', 'NVT_NH', 'Opt_LBFGS',
-            'NVT_VS2', 'EvsLC', 'NEB', 'NVT_VS4', 'NVT_Langevin', 'DF', 'OptC1', 'OptC2', 'OptC3',
-            'OptC4', 'OptC5', 'RFC1', 'RFC2', 'RFC3', 'RFC4', 'RFC5', 'NPT_VS_PR', 'NPT_VS_WV',
-            'NPT_NH_PR', 'NPT_NH_WV', 'RFC6', 'RFC7', 'OptC6', 'OptC7'
-        ),
+        'type':
+        str,
+        'default':
+        'NOMD',
+        'available':
+        ('NOMD', 'NVE', 'NVT_VS', 'Opt', 'EF', 'BFGS', 'RF', 'DIIS', 'NVT_NH',
+         'Opt_LBFGS', 'NVT_VS2', 'EvsLC', 'NEB', 'NVT_VS4', 'NVT_Langevin',
+         'DF', 'OptC1', 'OptC2', 'OptC3', 'OptC4', 'OptC5', 'RFC1', 'RFC2',
+         'RFC3', 'RFC4', 'RFC5', 'NPT_VS_PR', 'NPT_VS_WV', 'NPT_NH_PR',
+         'NPT_NH_WV', 'RFC6', 'RFC7', 'OptC6', 'OptC7'),
     },
     'MD.maxIter': {  # Note: must be 7 if MD.Type == 'DF' (delta-factor)
         'type': int,
@@ -153,7 +155,7 @@ PARAMETERS = {
     'MD.EvsLC.flag': {
         'type': ty.Iterable[int],
         'default': (1, 1, 1),
-        'dims': (3,)
+        'dims': (3, )
     },
     'MD.Out.ABC': {
         'type': bool,
@@ -192,13 +194,16 @@ PARAMETERS = {
     'NPT.WV.F0': {},
     'LNO.flag': {
         'type': bool,
-        'default': False  # set to True if scf.EigenvalueSolver in ['DC-LNO', 'Cluster-LNO']
+        'default':
+        False  # set to True if scf.EigenvalueSolver in ['DC-LNO', 'Cluster-LNO']
     },
     'scf.EigenvalueSolver': {
-        'type': str,
-        'default': 'Band',  # AZ: I think this is best as the default
-        'available': ('Cluster', 'Band', 'NEGF', 'DC', 'Cluster-DIIS', 'Krylov', 'Cluster2', 'EGAC', 'DC-LNO',
-        'Cluster-LNO')
+        'type':
+        str,
+        'default':
+        'Band',  # AZ: I think this is best as the default
+        'available': ('Cluster', 'Band', 'NEGF', 'DC', 'Cluster-DIIS',
+                      'Krylov', 'Cluster2', 'EGAC', 'DC-LNO', 'Cluster-LNO')
     },
     'scf.lapack.dste': {
         'type': str,
@@ -221,7 +226,8 @@ PARAMETERS = {
     'scf.Generation.Kpoint': {
         'type': str,
         'default': 'REGULAR',
-        'available': ('REGULAR', 'MP')  # MP can't be used with scf.EigenvalueSolver = 'NEGF'
+        'available': ('REGULAR', 'MP'
+                      )  # MP can't be used with scf.EigenvalueSolver = 'NEGF'
     },
     'FT.files.save': {
         'type': bool,
@@ -231,7 +237,7 @@ PARAMETERS = {
         'type': bool,
         'default': False
     },
-    'scf.XcType' : {},
+    'scf.XcType': {},
     'scf.SpinPolarization': {},
     'scf.Constraint.NC.Spin': {},
     'scf.Constraint.NC.Spin.V': {},

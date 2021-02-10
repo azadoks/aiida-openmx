@@ -8,6 +8,7 @@ from aiida.engine import CalcJob
 
 from ..utils._dict import _uppercase_dict
 
+
 class OpenmxCalculation(CalcJob):
     """`CalcJob` for OpenMX."""
 
@@ -80,16 +81,20 @@ class OpenmxCalculation(CalcJob):
         if set(kinds) != set(self.inputs.pseudos.keys()):
             raise exceptions.InputValidationError(
                 'Mismatch between the defined pseudos and the list of kinds of the structure.\n'
-                'Pseudos: {};\nKinds: {}'.format(', '.join(list(self.inputs.pseudos.keys()))), ', '.join(list(kinds)))
+                'Pseudos: {};\nKinds: {}'.format(', '.join(
+                    list(self.inputs.pseudos.keys()))), ', '.join(list(kinds)))
         # Check that an orbital basis was specified for each kind present in the `StructureData`
         if set(kinds) != set(self.inputs.orbitals.keys()):
             raise exceptions.InputValidationError(
                 'Mismatch between the defined orbitals and the list of kinds of the structure.\n'
-                'Orbitals: {};\nKinds: {}'.format(', '.join(list(self.inputs.orbitals.keys()))), ', '.join(list(kinds)))
+                'Orbitals: {};\nKinds: {}'.format(', '.join(
+                    list(self.inputs.orbitals.keys()))),
+                ', '.join(list(kinds)))
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
-            settings = _uppercase_dict(self.inputs.settings.get_dict(), dict_name='settings')
+            settings = _uppercase_dict(self.inputs.settings.get_dict(),
+                                       dict_name='settings')
         else:
             settings = {}
 
@@ -113,7 +118,8 @@ class OpenmxCalculation(CalcJob):
         ]
 
         # Get input file contents and lists of the pseudopotential and orbital files which need to be copied
-        input_filecontent, local_copy_pseudo_list, local_copy_orbital_list = self._generate_inputdata(*arguments)
+        input_filecontent, local_copy_pseudo_list, local_copy_orbital_list = self._generate_inputdata(
+            *arguments)
         local_copy_list += local_copy_pseudo_list
         local_copy_list += local_copy_orbital_list
 
@@ -125,7 +131,8 @@ class OpenmxCalculation(CalcJob):
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
         cmdline_params = settings.pop('CMDLINE', [])
-        codeinfo.cmdline_params = ([self.metadata.options.input_filename] + list(cmdline_params))
+        codeinfo.cmdline_params = ([self.metadata.options.input_filename] +
+                                   list(cmdline_params))
         codeinfo.stdout_name = self.metadata.options.output_filename
 
         # Fill out the `CalcInfo`
@@ -146,9 +153,11 @@ class OpenmxCalculation(CalcJob):
 
         return calcinfo
 
-    def _generate_inputdata(structure, kpoints, parameters, settings, pseudos, orbitals):
-        
+    def _generate_inputdata(structure, kpoints, parameters, settings, pseudos,
+                            orbitals):
+
         return
+
 
 def _def_atomic_sepcies(structure, pseudos, orbitals):
     TAG = 'Definition.of.Atomic.Species'
@@ -158,10 +167,13 @@ def _def_atomic_sepcies(structure, pseudos, orbitals):
         pseudo_file_stem = splitext(pseudos[kind.name].filename)
         orbital_file_stem = splitext(orbitals[kind.name].filename)
         orbital_configuration = orbitals[kind.name].configuration
-        lines.append(f'{kind.name} {pseudo_file_stem} {orbital_file_stem}-{orbital_configuration}')
+        lines.append(
+            f'{kind.name} {pseudo_file_stem} {orbital_file_stem}-{orbital_configuration}'
+        )
     block = '\n'.join(lines)
 
     return f'<{TAG}\n{block}\n{TAG}>'
+
 
 def _atoms_spec_and_coords(structure, orbitals):
     TAG = 'Atoms.SpeciesAndCoordinates'
@@ -171,8 +183,8 @@ def _atoms_spec_and_coords(structure, orbitals):
         index = i + 1
         specie = site.kind_name
         coords = site.position
-        valence_elec = orbitals[specie].valence_elec
-        charge_up, charge_down = valence_elec / 2, valence_elec / 2
+        valence = orbitals[specie].valence_
+        charge_up, charge_down = valence / 2, valence / 2
         lines.append(
             f'{index} {specie} {coords[0]} {coords[1]} {coords[2]} {charge_up} {charge_down}'
         )
@@ -180,12 +192,14 @@ def _atoms_spec_and_coords(structure, orbitals):
 
     return f'<{TAG}\n{block}\n{TAG}>'
 
+
 def _atoms_unit_vectors(structure):
     TAG = 'Atoms.UnitVectors'
 
     lines = []
     for cell_vector in structure.cell:
-        lines.append(' '.join([f'{component:0.12f}' for component in cell_vector]))
+        lines.append(' '.join(
+            [f'{component:0.12f}' for component in cell_vector]))
     block = '\n'.join(lines)
 
     return f'<{TAG}\n{block}\n{TAG}>'
