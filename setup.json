@@ -22,7 +22,7 @@
             "openmx.openmx = aiida_openmx.calculations.openmx:OpenmxCalculation"
         ],
         "aiida.parsers": [
-            "openmx.pao = aiida_openmx.data.pao:PaoData"
+            "openmx.openmx = aiida_openmx.parsers.openmx:OpenmxParser"
         ],
         "aiida.cmdline.data": [
         ]

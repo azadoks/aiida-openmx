@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Dictionary utilities."""
 
 from collections import Counter

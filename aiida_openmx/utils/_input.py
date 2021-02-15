@@ -1,18 +1,20 @@
-"""Input utilities."""
+# -*- coding: utf-8 -*-
+"""Input utilities and constants."""
 
 from os.path import splitext
+import functools
 
 import jsonschema
 import numpy as np
 
 _RESERVED_KEYWORDS = [
-    'System.CurrentDirectory', 'System.Name', 'DATA.PATH', 'level.of.stdout',
-    'level.of.fileout', 'Species.Number', 'Definition.of.Atomic.Species',
-    'scf.XcType', 'scf.Kgrid', 'Atoms.Number',
-    'Atoms.SpeciesAndCoordinates.Unit', 'Atoms.SpeciesAndCoordinates',
-    'Atoms.Unitvectors.Unit', 'Atoms.Unitvectors', 'Atoms.NetCharge',
-    'scf.restart', 'scf.restart.filename', 'Dos.fileout', 'DosGauss.fileout',
-    'FermiSurfer.fileout', 'HS.fileout'
+    'System_CurrentDirectory', 'System_Name', 'DATA_PATH', 'level_of_stdout',
+    'level_of_fileout', 'Species_Number', 'Definition_of_Atomic_Species',
+    'scf_XcType', 'scf_Kgrid', 'Atoms_Number',
+    'Atoms_SpeciesAndCoordinates_Unit', 'Atoms_SpeciesAndCoordinates',
+    'Atoms_Unitvectors_Unit', 'Atoms_Unitvectors', 'Atoms_NetCharge',
+    'scf_restart', 'scf_restart_filename', 'Dos_fileout', 'DosGauss_fileout',
+    'FermiSurfer_fileout', 'HS_fileout'
 ]
 
 _FORMAT_TYPE_MAPPING = {
@@ -25,43 +27,41 @@ _FORMAT_TYPE_MAPPING = {
 def _get_is_int(validator):
     """Create a integer type checker with numpy support for the given validator."""
     def is_int(checker, instance):
-        return (
-            validator.TYPE_CHECKER.is_type(instance, 'integer') or
-            isinstance(instance, np.int16) or
-            isinstance(instance, np.int32) or
-            isinstance(instance, np.int64) or
-            isinstance(instance, np.int128)
-        )
+        return (validator.TYPE_CHECKER.is_type(instance, 'integer')
+                or isinstance(instance, np.int16)
+                or isinstance(instance, np.int32)
+                or isinstance(instance, np.int64)
+                or isinstance(instance, np.int128))
+
     return is_int
 
 
 def _get_is_number(validator):
     """Create a number type checker with numpy support for the given validator."""
     def is_number(checker, instance):
-        return (
-            validator.TYPE_CHECKER.is_type(instance, 'number') or
-            isinstance(instance, np.int16) or
-            isinstance(instance, np.int32) or
-            isinstance(instance, np.int64) or
-            isinstance(instance, np.int128) or
-            isinstance(instance, np.float16) or
-            isinstance(instance, np.float32) or
-            isinstance(instance, np.float64) or 
-            isinstance(instance, np.float128) or
-            isinstance(instance, np.complex64) or
-            isinstance(instance, np.complex128) or
-            isinstance(instance, np.complex256)
-        )
+        return (validator.TYPE_CHECKER.is_type(instance, 'number')
+                or isinstance(instance, np.int16)
+                or isinstance(instance, np.int32)
+                or isinstance(instance, np.int64)
+                or isinstance(instance, np.int128)
+                or isinstance(instance, np.float16)
+                or isinstance(instance, np.float32)
+                or isinstance(instance, np.float64)
+                or isinstance(instance, np.float128)
+                or isinstance(instance, np.complex64)
+                or isinstance(instance, np.complex128)
+                or isinstance(instance, np.complex256))
+
     return is_number
 
 
 def _get_is_array(validator):
     """Create an array type checker with numpy support for the given validator."""
     def is_array(checker, instance):
-        return (
-            validator.TYPE_CHECKER.is_type(instance, 'array') or
-            isinstance(instance, np.ndarray)
-        )
+        return (validator.TYPE_CHECKER.is_type(instance, 'array')
+                or isinstance(instance, tuple) 
+                or isinstance(instance, np.ndarray))
+
     return is_array
 
 
@@ -72,8 +72,9 @@ def _get_validator(schema):
     type_checker = type_checker.redefine('integer', _get_is_int(validator))
     type_checker = type_checker.redefine('number', _get_is_number(validator))
     type_checker = type_checker.redefine('array', _get_is_array(validator))
-    OpenmxValidator = jsonschema.validators.extend(validator, type_checker=type_checker)
-    return OpenmxValidator
+    OpenmxValidator = jsonschema.validators.extend(validator,
+                                                   type_checker=type_checker)
+    return OpenmxValidator(schema)
 
 
 def validate_parameters(schema, parameters):
@@ -92,7 +93,7 @@ def validate_parameters(schema, parameters):
 
 
 def _get_xc_type(pseudos):
-    """Get the `scf.XcType` parameter from a set of pseudos."""
+    """Get the `scf_XcType` parameter from a set of pseudos."""
     xc_set = {pseudo.xc_type for pseudo in pseudos.values()}
     if len(xc_set) != 1:
         msg = 'The provided pseudos have inconsistent exchange-correlation type.'
@@ -100,14 +101,14 @@ def _get_xc_type(pseudos):
     return xc_set.pop()
 
 
-def _get_def_atomic_spcies(structure, pseudos, orbitals):
+def _get_def_atomic_species(structure, pseudos, orbitals, orbital_configurations):
     """Construct the `Definition.of.Atomic.Species` parameter dictionary."""
     def_atomic_species = {}
     for kind in structure.kinds:
-        def_atomic_species[kind] = {
+        def_atomic_species[kind.name] = {
             'pao': {
                 'file_stem': splitext(orbitals[kind.name].filename)[0],
-                'orbital_configuration': orbitals[kind.name].orbital_configuration
+                'orbital_configuration': orbital_configurations.get_array(kind.name)
             },
             'pseudo': splitext(pseudos[kind.name].filename)[0]
         }
@@ -131,19 +132,22 @@ def _get_atoms_spec_and_coords(structure, orbitals):
 
 def _tag_block(block, tag):
     """Add the open and close tags to an input block."""
-    return f'<{tag}\n' + block + f'\n{tag}\n'
+    return f'<{tag}\n' + block + f'\n{tag}>\n'
 
 
 def _write_def_atomic_species(def_atomic_species):
-    """Write the `Definition.of.Atomic.Species` input block."""
+    """Write the `Definition_of_Atomic_Species` input block."""
     ORB_MAP = {0: 's', 1: 'p', 2: 'd', 3: 'f'}
     TAG = 'Definition.of.Atomic.Species'
     lines = []
     for specie, data in def_atomic_species.items():
-        orbital_config = ''.join(
-            [f'{ORB_MAP[i]}{n_orb}' for i, n_orb in enumerate(data['pao']['orbital_configuration'])]
+        orbital_config = ''.join([
+            f'{ORB_MAP[i]}{n_orb}'
+            for i, n_orb in enumerate(data['pao']['orbital_configuration']) if n_orb != 0
+        ])
+        lines.append(
+            f'{specie} {data["pao"]["file_stem"]}-{orbital_config} {data["pseudo"]}'
         )
-        lines.append(f'{specie} {data["pseudo"]} {data["pao"]["file_stem"]}-{orbital_config}')
     block = _tag_block('\n'.join(lines), TAG)
     return block
 
@@ -158,7 +162,9 @@ def _write_atoms_spec_and_coords(atoms_spec_and_coords):
         x, y, z = data['coords']
         up_charge = data['up_charge']
         down_charge = data['down_charge']
-        lines.append(f'{index:d} {kind_name} {x:0.12f} {y:0.12f} {z:0.12f} {up_charge:0.6f} {down_charge:0.6f}')
+        lines.append(
+            f'{index:d} {kind_name} {x:0.12f} {y:0.12f} {z:0.12f} {up_charge:0.6f} {down_charge:0.6f}'
+        )
     block = _tag_block('\n'.join(lines), TAG)
     return block
 
@@ -185,10 +191,38 @@ def _write_array_block(array, type, tag):
     return block
 
 
-_BLOCK_PARAMETERS = {
-    'Atoms.SpeciesAndCoordinates': _write_atoms_spec_and_coords,
-    'Atoms.Unitvectors.Unit': _write_array_block,
-    'Definition.of.Atomic.Species': _write_def_atomic_species,
-    'Band.kpath': _write_band_kpath,
-    'Band.kpath.UnitCell': _write_array_block,
+def write_input_file(parameters, schema):
+    """
+    Write an OpenMX input file.
+
+    :param parameters: Input parameters
+    :param schema: Input parameters schema
+    :returns: Input file content
+    """
+    input_file_content = ''
+    for kw, value in parameters.items():
+        value_type = schema['properties'][kw]['type']
+        # 2D arrays and complex data
+        if kw in _BLOCK_PARAMETER_WRITERS:
+            param_content = _BLOCK_PARAMETER_WRITERS[kw](value)
+        # 1D arrays
+        elif value_type == 'array':
+            item_type = schema['properties'][kw]['items']['type']
+            item_format = _FORMAT_TYPE_MAPPING[item_type]
+            param_content = ' '.join([kw.replace('_', '.')] + [item_format.format(item) for item in value]) + '\n'
+        # Scalar values
+        else:
+            value_format = _FORMAT_TYPE_MAPPING[value_type]
+            param_content = ' '.join([kw.replace('_', '.'), value_format.format(value)]) + '\n'
+        input_file_content += param_content
+
+    return input_file_content
+
+
+_BLOCK_PARAMETER_WRITERS = {
+    'Atoms_SpeciesAndCoordinates': _write_atoms_spec_and_coords,
+    'Atoms_Unitvectors': functools.partial(_write_array_block, type='number', tag='Atoms.Unitvectors'),
+    'Definition_of_Atomic_Species': _write_def_atomic_species,
+    'Band_kpath': _write_band_kpath,
+    'Band_kpath_UnitCell': functools.partial(_write_array_block, type='number', tag='Band.kpath.UnitCell')
 }
