@@ -7,10 +7,9 @@ import numpy as np
 # options, dimensions, range, and other information about each of the parameters
 # is recorded; however, this information may be incomplete! 
 PARAMETERS = {
-    'System.CurrentDirectory': {
+    'System.CurrrentDirectory': {
         'type': str,
         'default': './',
-        'required': True
     },
     'System.Name': {
         'type': str,

@@ -1,37 +1,36 @@
 """`CalcJob` for OpenMX."""
 
-import os
 import copy
+import json
+import os
 
 import numpy as np
-
 from aiida import orm
 from aiida.common import datastructures, exceptions, folders
 from aiida.engine import CalcJob
+from aiida_pseudo.data.pseudo import VpsData
 
 from ..utils._dict import _uppercase_dict
+from ..utils._input import (_BLOCK_PARAMETERS, _FORMAT_TYPE_MAPPING,
+                            _RESERVED_KEYWORDS, _get_atoms_spec_and_coords,
+                            _get_def_atomic_species, _get_xc_type,
+                            validate_parameters)
 from ..utils._parameters import PARAMETERS, RESERVED_KEYWORDS
-from ..utils._input import _atoms_spec_and_coords, _atoms_unit_vectors, _def_atomic_species, _xc_type
 
 
 class OpenmxCalculation(CalcJob):
     """`CalcJob` for OpenMX."""
 
-    # Subfolders
-    _PSEUDO_SUBFOLDER = './VPS/'
-    _ORBITAL_SUBFOLDER = './PAO/'
-    _OUTPUT_SUBFOLDER = './out/'
+    _DATA_PATH = './'
+    _PSEUDO_SUBFOLDER = _DATA_PATH + 'VPS/'
+    _ORBITAL_SUBFOLDER = _DATA_PATH + 'PAO/'
     _SYSTEM_NAME = 'aiida'
+    _INPUT_SCHEMA = 'openmx-input-schema.json'
 
-    # Retrieve list
     _RETRIEVE_LIST = []
 
-    # Defaults
     _DEFAULT_INPUT_FILE = 'aiida.in'
     _DEFAULT_OUTPUT_FILE = 'aiida.out'
-    _DEFAULT_DOS_OUTPUT_FILE = 'aiida.dos'
-    _DEFAULT_FERMI_OUTPUT_FILE = 'aiida.fermi'
-    _DEFAULT_HS_OUTPUT_FILE = 'aiida.hs'
     _DEFAULT_PARSER_NAME = 'openmx.openmx'
 
     @classmethod
@@ -44,9 +43,6 @@ class OpenmxCalculation(CalcJob):
         # Metadata
         spec.input('metadata.options.input_filename', valid_type=str, default=cls._DEFAULT_INPUT_FILE)
         spec.input('metadata.options.output_filename', valid_type=str, default=cls._DEFAULT_OUTPUT_FILE)
-        spec.input('metadata.options.dos_output_filenmae', valid_type=str, default=cls._DEFAULT_DOS_OUTPUT_FILE)
-        spec.input('metadata.options.fermi_output_filename', valid_type=str, default=cls._DEFAULT_FERMI_OUTPUT_FILE)
-        spec.input('metadata.options.hs_output_filename', valid_type=str, default=cls._DEFAULT_HS_OUTPUT_FILE)
         spec.input('metadata.options.parser_name', valid_type=str, default=cls._DEFAULT_PARSER_NAME)
         spec.input('metadata.options.withmpi', valid_type=bool, default=True)
         spec.input('metadata.options.resources', valid_type=dict,
@@ -63,8 +59,8 @@ class OpenmxCalculation(CalcJob):
         # Input namespaces
         spec.input_namespace('pseudos', valid_type=VpsData, dynamic=True,
             help='A mapping of `VpsData` nodes onto the kind name to which they should apply.')
-        spec.input_namespace('orbitals', valid_type=PaoData, dynamic=True,
-            help='A mapping of `PaoData` nodes onto the kind of name to which they should apply.')
+        spec.input_namespace('basis_set', valid_type=orm.Str, dynamic=True,
+            help='A mapping of PAO file names onto the kind name to which they should apply.')
 
         ## Outputs
         spec.output('output_parameters', valid_type=orm.Dict,
@@ -95,8 +91,6 @@ class OpenmxCalculation(CalcJob):
 
         # Create the subfolder that will contain the pseudopotentials
         folder.get_subfolder(self._PSEUDO_SUBFOLDER, create=True)
-        # Create the subfolder that will contain the orbitals
-        folder.get_subfolder(self._ORBITAL_SUBFOLDER, create=True)
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
@@ -109,7 +103,7 @@ class OpenmxCalculation(CalcJob):
         arguments = [
             self.inputs.structure,
             self.inputs.parameters,
-            settings,  # The uppercase-key-only dict
+            self.inputs.metadata.get_dict(),
             self.inputs.pseudos,
             self.inputs.orbitals,
         ]
@@ -118,9 +112,8 @@ class OpenmxCalculation(CalcJob):
         self._validate_inputs(*arguments)
 
         # Get input file contents and lists of the pseudopotential and orbital files which need to be copied
-        input_file_content, local_copy_pseudo_list, local_copy_orbital_list = self._generate_inputdata(*arguments)
+        input_file_content, local_copy_pseudo_list = self._generate_input_data(*arguments)
         local_copy_list += local_copy_pseudo_list
-        local_copy_list += local_copy_orbital_list
 
         # Write input file
         with folder.open(self.metadata.options.input_filename, 'w') as handle:
@@ -150,7 +143,7 @@ class OpenmxCalculation(CalcJob):
 
         return calcinfo
 
-    def _validate_inputs(structure, kpoints, parameters, settings, pseudos, orbitals):
+    def _validate_inputs(structure, kpoints, parameters, metadata, pseudos, orbitals):
         # Check that a pseudopotential is specified for each kind present in the `StructureData`
         kinds = [kind.name for kind in structure.kinds]
         if set(kinds) != set(pseudos.keys()):
@@ -187,80 +180,53 @@ class OpenmxCalculation(CalcJob):
         # Check that no reserved parameter keywords are provided
         provided_reserved_kws = []
         for kw in parameters:
-            if kw in RESERVED_KEYWORDS:
+            if kw in _RESERVED_KEYWORDS:
                 provided_reserved_kws.append(kw)
         if provided_reserved_kws:
             msg = f'The reserved keywords {", ".join(provided_reserved_kws)} should not be provided.'
             raise exceptions.InputValidationError(msg)
 
-        # Check parameters against our specification
-        for kw, param in parameters:
-            param_def = PARAMETERS[kw]
-            # Check type
-            if (param_type := param_def.get('type')) is not None:
-                if not isinstance(param, param_type):
-                    msg = f'Parameter {kw} should be {param_type} but is {type(param)}.'
-                    raise exceptions.InputValidationError(msg)
-                
-            # Check shape
-            if (shape := param_def.get('shape')) is not None:
-                if not np.shape(param) == shape:
-                    msg = f'Parameter {kw} should have shape {shape} but has shape {np.shape(param)}'
-                    raise exceptions.InputValidationError(msg)
+        # Check that the KpointsData has a kpoints_mesh; explicit k-points are not yet supported
+        try:
+            kpoints.get_kpoints_mesh()
+        except AttributeError:
+            raise exceptions.InputValidationError(
+                'Explicit k-points are not yet supported. Instead, set a k-points mesh using '
+                'KpointsData.set_kpoints_mesh().'
+            )
 
-            # Check limits (numerical parameters)
-            if (lims := param_def.get('lims')) is not None:
-                if param <= lims[0]:
-                    msg = f'Parameter {kw} ({param}) <= lower limit ({lims[0]}).'
-                    raise exceptions.InputValidationError(msg)
-                if param > lims[1]:
-                    msg = f'Parameter {kw} ({param}) > upper limit ({lims[1]}).'
-                    raise exceptions.InputValidationError(msg)
-
-            # Check string arguments against valid options
-            if (options := param_def.get('options')) is not None:
-                if kw not in options:
-                    msg = f'Parameter {kw} ({param}) is not in the valid options ({options}).'
-                    raise exceptions.InputValidationError(msg)
-
-    def _generate_inputdata(cls, structure, kpoints, parameters, settings, pseudos, orbitals):
+    def _generate_input_data(cls, structure, kpoints, parameters, metadata, pseudos, orbitals):
         parameters = copy.deepcopy(parameters)
-        
-        parameters['System.CurrentDirectory'] = cls._OUTPUT_SUBFOLDER
+
+        # Fill out parameters
         parameters['System.Name'] = cls._SYSTEM_NAME
-        parameters['DATA.PATH'] = './'
+        parameters['DATA.PATH'] = cls._DATA_PATH
         parameters['level.of.stdout'] = 3
         parameters['level.of.fileout'] = 3
         parameters['Species.Number'] = len(structure.kinds)
-        parameters['Definition.of.Atomic.Species'] = _def_atomic_species(structure, pseudos, orbitals)
-        parameters['scf.XcType'] = _xc_type(pseudos)
-        parameters['scf.Kgrid'] = kpoints.get_kpoints_mesh()
+        parameters['Definition.of.Atomic.Species'] = _get_def_atomic_species(structure, pseudos, orbitals)
         parameters['Atoms.Number'] = len(structure.sites)
-        parameters['Atoms.SpeciesAndCoordinates'] = _atoms_spec_and_coords(structure, pseudos, orbitals)
-        parameters['Atoms.Unitvectors.Unit'] = 'Ang'
-        parameters['Atoms.UnitVectors'] = _atoms_unit_vectors(structure)
+        parameters['Atoms.SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(structure, pseudos, orbitals)
+        parameters['Atoms.UnitVectors'] = structure.cell
+        parameters['scf.XcType'] = _get_xc_type(pseudos)
+        parameters['scf.Kgrid'] = kpoints.get_kpoints_mesh()
 
-        # TODO: order parameters by section
-        # PARAMETERS is ordered, so we will follow that order
+        # Validate parameters using jsonschema
+        with open(f'../schema/{cls._INPUT_SCHEMA}', 'r') as stream:
+            schema = json.load(stream)
+        validate_parameters(schema, parameters)
+
+        # Write parameters to file contents string
         input_file_content = ''
-        for kw, param_def in PARAMETERS.items():
-            if parameters.get(kw) or param_def.get('required'):
-                param = parameters.get(kw, param_def.get('default'))
-                # Block parameters are provided as pre-formatted strings, and they must be bracketed
-                # by "<{keyword}" and "{keyword}>"
-                if param_def.get('block'):
-                    param_content = f'<{kw}\n{param}\n{kw}>\n'
-                # All other parameters go on the same line as their keyword
-                else:
-                    if param_def['type'] is float:
-                        param_content = f'{kw}    {param:0.12f}\n'
-                    # Booleans must be converted to OpenMX's "on" / "off" syntax
-                    elif param_def['type'] is bool:
-                        param_content = f'{kw}    {"on" if param else "off"}\n'
-                    else:
-                        param_content = f'{kw}    {param}\n'
-                input_file_content += param_content
+        for kw, value in parameters:
+            if kw in _BLOCK_PARAMETERS:
+                param_content = _BLOCK_PARAMETERS[kw](value)
+            else:
+                value_format = _FORMAT_TYPE_MAPPING(schema[kw]['type'])
+                param_content = ' '.join([kw, value_format.format(value)]) + '\n'
+            input_file_content += param_content
 
+        # List files
         pseudo_file_list = [
             (pseudo.uuid, pseudo.filename, os.path.join(cls._PSEUDO_SUBFOLDER, pseudo.filename))
                 for pseudo in pseudos.values()
