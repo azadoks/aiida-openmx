@@ -6,34 +6,36 @@
     "url": "https://github.com/zooks97/aiida-openmx",
     "license": "MIT",
     "classifiers": [
-        "Programming Language :: Python",
-        "Intended Audience :: Science/Research",
+        "Framework :: AiiDA",
         "License :: OSI Approved :: MIT License",
-        "Natural Language :: English",
-        "Framework :: AiiDA"
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Development Status :: 3 - Alpha"
     ],
     "version": "0.1.0a0",
     "entry_points": {
         "aiida.data": [
-            "openmx = aiida_openmx.data:DiffParameters"
         ],
         "aiida.calculations": [
-            "openmx = aiida_openmx.calculations:DiffCalculation"
+            "openmx.openmx = aiida_openmx.calculations.openmx:OpenmxCalculation"
         ],
         "aiida.parsers": [
-            "openmx = aiida_openmx.parsers:DiffParser"
+            "openmx.openmx = aiida_openmx.parsers.openmx:OpenmxParser"
         ],
         "aiida.cmdline.data": [
-            "openmx = aiida_openmx.cli:data_cli"
         ]
     },
     "include_package_data": true,
     "setup_requires": ["reentry"],
     "reentry_register": true,
+    "python_requires": ">=3.6",
     "install_requires": [
         "aiida-core>=1.1.0,<2.0.0",
+        "aiida-pseudo>=0.4.0",
         "six",
-        "voluptuous"
+        "numpy"
     ],
     "extras_require": {
         "testing": [
