@@ -14,3 +14,4 @@ build/
 dist/
 play/
 pip-wheel-metadata/
+__pycache__/

@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "name": "aiida_openmx_parameters",
-    "description": "JSON for describiong the input parameters to OpenMX",
+    "description": "JSON for describing the input parameters to OpenMX",
     "version": "0.1.0",
     "required": [ "Species_Number", "Atoms_Number", "Definition_of_Atomic_Species", "Atoms_SpeciesAndCoordinates",
         "Atoms_Unitvectors", "scf_EigenvalueSolver" ],

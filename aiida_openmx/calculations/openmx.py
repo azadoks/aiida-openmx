@@ -106,13 +106,7 @@ class OpenmxCalculation(CalcJob):
 
         # No reserved parameter keywords should be provided
         parameters = self.inputs.parameters.get_dict()
-        provided_reserved_kws = []
-        for kw in parameters:
-            if kw in _RESERVED_KEYWORDS:
-                provided_reserved_kws.append(kw)
-        if provided_reserved_kws:
-            msg = f'The reserved keywords {", ".join(provided_reserved_kws)} were specified but should not be provided.'
-            raise exceptions.InputValidationError(msg)
+        self._check_reserved_keywords(parameters)
 
         # Load parameter schema
         with open(self._INPUT_SCHEMA, 'r') as stream:
@@ -126,7 +120,8 @@ class OpenmxCalculation(CalcJob):
 
         # Validate input parameters
         self._validate_inputs(
-            self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos, self.inputs.orbitals, schema
+            self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos, self.inputs.orbitals,
+            self.inputs.orbital_configurations, schema
         )
 
         # Get input file contents and lists of the pseudopotential and orbital files which need to be copied
@@ -185,8 +180,17 @@ class OpenmxCalculation(CalcJob):
 
         return parameters
 
+    def _check_reserved_keywords(self, parameters):
+        provided_reserved_kws = []
+        for kw in parameters:
+            if kw in _RESERVED_KEYWORDS:
+                provided_reserved_kws.append(kw)
+        if provided_reserved_kws:
+            msg = f'The reserved keywords {", ".join(provided_reserved_kws)} were specified but should not be provided.'
+            raise exceptions.InputValidationError(msg)
+
     # pylint: disable=too-many-arguments
-    def _validate_inputs(cls, structure, kpoints, parameters, pseudos, orbitals, schema):
+    def _validate_inputs(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations, schema):
         # A pseudopotential should be specified for each kind present in the `StructureData`
         kinds = [kind.name for kind in structure.kinds]
         if set(kinds) != set(pseudos.keys()):
@@ -219,14 +223,31 @@ class OpenmxCalculation(CalcJob):
                 f'Mismatch between the pseudopotential and orbital valences: {inconsistent_z_valence}.'
             )
 
-        # KpointsData should have a kpoints_mesh; explicit k-points are not yet supported
+        # An orbital configuration should be specified for each orbital basis
+        if set(orbital_configurations.get_arraynames()) != set(orbitals.keys()):
+            raise exceptions.InputValidationError(
+                'Mismatch between the defined orbitals and the array names of the orbital configurations.\n'
+                'Orbitals: {};\nOrbital configurations: {}'.format(
+                    ','.join(list(orbitals.keys())), ', '.join(orbital_configurations.get_arraynames())
+                )
+            )
+
+        # KpointsData should have a kpoints_mesh; explicit k-points are not supported
         try:
             kpoints.get_kpoints_mesh()
         except AttributeError:
             raise exceptions.InputValidationError(
-                'Explicit k-points are not yet supported. Instead, set a k-points mesh using '
+                'Explicit k-points are not supported. Instead, set a k-points mesh using '
                 'KpointsData.set_kpoints_mesh().'
             )
+
+        # KpointsData should have a 0-shift; shifts are not supported
+        try:
+            shift = kpoints.get_kpoints_mesh()[1]
+            if any([shift_i != 0 for shift_i in shift]):
+                raise exceptions.InputValidationError('k-points shifts are not supported.')
+        except AttributeError:
+            pass
 
         # Validate against the JSON schema
         validate_parameters(schema, parameters)

@@ -190,6 +190,7 @@ def write_input_file(parameters, schema):
     input_file_content = ''
     for kw, value in parameters.items():
         value_type = schema['properties'][kw]['type']
+        kw_str = kw.replace('_', '.')
         # 2D arrays and complex data
         if kw in _BLOCK_PARAMETER_WRITERS:
             param_content = _BLOCK_PARAMETER_WRITERS[kw](value)
@@ -197,11 +198,14 @@ def write_input_file(parameters, schema):
         elif value_type == 'array':
             item_type = schema['properties'][kw]['items']['type']
             item_format = _FORMAT_TYPE_MAPPING[item_type]
-            param_content = ' '.join([kw.replace('_', '.')] + [item_format.format(item) for item in value]) + '\n'
+            param_content = ' '.join([kw_str] + [item_format.format(item) for item in value]) + '\n'
+        # Booleans must be -> ON/OFF for OpenMX
+        elif value_type == 'boolean':
+            param_content = ' '.join([kw_str, 'on' if value else 'off']) + '\n'
         # Scalar values
         else:
             value_format = _FORMAT_TYPE_MAPPING[value_type]
-            param_content = ' '.join([kw.replace('_', '.'), value_format.format(value)]) + '\n'
+            param_content = ' '.join([kw_str, value_format.format(value)]) + '\n'
         input_file_content += param_content
 
     return input_file_content
