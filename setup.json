@@ -57,7 +57,7 @@
             "sphinx",
             "sphinxcontrib-contentui",
             "sphinxcontrib-details-directive; python_version>='3.0'",
-            "pydata-sphinx-theme~=0.4.0"
+            "pydata-rtd-theme"
         ]
     }
 }
