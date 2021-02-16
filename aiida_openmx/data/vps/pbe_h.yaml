@@ -1,231 +1,231 @@
-H: 
+H:
   name: H_PBE19
-  valence: 
-He: 
+  valence:
+He:
   name: He_PBE19
-  valence: 
-Li: 
+  valence:
+Li:
   name: Li_PBE19
-  valence: 
-Be: 
+  valence:
+Be:
   name: Be_PBE19
-  valence: 
-B: 
+  valence:
+B:
   name: B_PBE19
-  valence: 
-C: 
+  valence:
+C:
   name: C_PBE19
-  valence: 
-N: 
+  valence:
+N:
   name: N_PBE19
-  valence: 
-O: 
+  valence:
+O:
   name: O_PBE19
-  valence: 
-F: 
+  valence:
+F:
   name: F_PBE19
-  valence: 
-Ne: 
+  valence:
+Ne:
   name: Ne_PBE19
-  valence: 
-Na: 
+  valence:
+Na:
   name: Na_PBE19
-  valence: 
-Mg: 
+  valence:
+Mg:
   name: Mg_PBE19
-  valence: 
-Al: 
+  valence:
+Al:
   name: Al_PBE19
-  valence: 
-Si: 
+  valence:
+Si:
   name: Si_PBE19
-  valence: 
-P: 
+  valence:
+P:
   name: P_PBE19
-  valence: 
-S: 
+  valence:
+S:
   name: S_PBE19
-  valence: 
-Cl: 
+  valence:
+Cl:
   name: Cl_PBE19
-  valence: 
-Ar: 
+  valence:
+Ar:
   name: Ar_PBE19
-  valence: 
-K: 
+  valence:
+K:
   name: K_PBE19
-  valence: 
-Ca: 
+  valence:
+Ca:
   name: Ca_PBE19
-  valence: 
-Sc: 
+  valence:
+Sc:
   name: Sc_PBE19
-  valence: 
-Ti: 
+  valence:
+Ti:
   name: Ti_PBE19
-  valence: 
-V: 
+  valence:
+V:
   name: V_PBE19
-  valence: 
-Cr: 
+  valence:
+Cr:
   name: Cr_PBE19
-  valence: 
-Mn: 
+  valence:
+Mn:
   name: Mn_PBE19
-  valence: 
-Fe: 
+  valence:
+Fe:
   name: Fe_PBE19H
-  valence: 
-Co: 
+  valence:
+Co:
   name: Co_PBE19H
-  valence: 
-Ni: 
+  valence:
+Ni:
   name: Ni_PBE19H
-  valence: 
-Cu: 
+  valence:
+Cu:
   name: Cu_PBE19H
-  valence: 
-Zn: 
+  valence:
+Zn:
   name: Zn_PBE19H
-  valence: 
-Ga: 
+  valence:
+Ga:
   name: Ga_PBE19
-  valence: 
-Ge: 
+  valence:
+Ge:
   name: Ge_PBE19
-  valence: 
-As: 
+  valence:
+As:
   name: As_PBE19
-  valence: 
-Se: 
+  valence:
+Se:
   name: Se_PBE19
-  valence: 
-Br: 
+  valence:
+Br:
   name: Br_PBE19
-  valence: 
-Kr: 
+  valence:
+Kr:
   name: Kr_PBE19
-  valence: 
-Rb: 
+  valence:
+Rb:
   name: Rb_PBE19
-  valence: 
-Sr: 
+  valence:
+Sr:
   name: Sr_PBE19
-  valence: 
-Y: 
+  valence:
+Y:
   name: Y_PBE19
-  valence: 
-Zr: 
+  valence:
+Zr:
   name: Zr_PBE19
-  valence: 
-Nb: 
+  valence:
+Nb:
   name: Nb_PBE19
-  valence: 
-Mo: 
+  valence:
+Mo:
   name: Mo_PBE19
-  valence: 
-Tc: 
+  valence:
+Tc:
   name: Tc_PBE19
-  valence: 
-Ru: 
+  valence:
+Ru:
   name: Ru_PBE19
-  valence: 
-Rh: 
+  valence:
+Rh:
   name: Rh_PBE19
-  valence: 
-Pd: 
+  valence:
+Pd:
   name: Pd_PBE19
-  valence: 
-Ag: 
+  valence:
+Ag:
   name: Ag_PBE19
-  valence: 
-Cd: 
+  valence:
+Cd:
   name: Cd_PBE19
-  valence: 
-In: 
+  valence:
+In:
   name: In_PBE19
-  valence: 
-Sn: 
+  valence:
+Sn:
   name: Sn_PBE19
-  valence: 
-Sb: 
+  valence:
+Sb:
   name: Sb_PBE19
-  valence: 
-Te: 
+  valence:
+Te:
   name: Te_PBE19
-  valence: 
-I: 
+  valence:
+I:
   name: I_PBE19
-  valence: 
-Xe: 
+  valence:
+Xe:
   name: Xe_PBE19
-  valence: 
-Cs: 
+  valence:
+Cs:
   name: Cs_PBE19
-  valence: 
-Ba: 
+  valence:
+Ba:
   name: Ba_PBE19
-  valence: 
-La: 
+  valence:
+La:
   name: La_PBE19
-  valence: 
-Ce: 
+  valence:
+Ce:
   name: Ce_PBE19
-  valence: 
-Pr: 
+  valence:
+Pr:
   name: Pr_PBE19
-  valence: 
-Nd: 
+  valence:
+Nd:
   name: Nd_PBE19
-  valence: 
-Pm: 
+  valence:
+Pm:
   name: Pm_PBE19
-  valence: 
-Sm: 
+  valence:
+Sm:
   name: Sm_PBE19
-  valence: 
-Dy: 
+  valence:
+Dy:
   name: Dy_PBE19
-  valence: 
-Ho: 
+  valence:
+Ho:
   name: Ho_PBE19
-  valence: 
-Lu: 
+  valence:
+Lu:
   name: Lu_PBE19
-  valence: 
-Hf: 
+  valence:
+Hf:
   name: Hf_PBE19
-  valence: 
-Ta: 
+  valence:
+Ta:
   name: Ta_PBE19
-  valence: 
-W: 
+  valence:
+W:
   name: W_PBE19
-  valence: 
-Re: 
+  valence:
+Re:
   name: Re_PBE19
-  valence: 
-Os: 
+  valence:
+Os:
   name: Os_PBE19
-  valence: 
-Ir: 
+  valence:
+Ir:
   name: Ir_PBE19
-  valence: 
-Pt: 
+  valence:
+Pt:
   name: Pt_PBE19
-  valence: 
-Au: 
+  valence:
+Au:
   name: Au_PBE19
-  valence: 
-Hg: 
+  valence:
+Hg:
   name: Hg_PBE19
-  valence: 
-Tl: 
+  valence:
+Tl:
   name: Tl_PBE19
-  valence: 
-Pb: 
+  valence:
+Pb:
   name: Pb_PBE19
-  valence: 
-Bi: 
+  valence:
+Bi:
   name: Bi_PBE19
-  valence: 
+  valence:

@@ -1,0 +1,29 @@
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.tool-check]
+generated-members = 'self.exit_codes.*'
+
+[tool.pylint.messages_control]
+disable = [
+    'inconsistent-return-statements',
+    'too-many-arguments',
+    'too-many-locals'
+]
+
+[tool.pylint.basic]
+good-names = [
+    'i',
+    'j',
+    'k',
+    'StructureData',
+    'PaoData',
+    'VpsData,
+    'OpenmxCalculation'
+]
+
+[tool.pytest.ini_options]
+minversion = '6.0
+testpaths = [
+    'tests
+]

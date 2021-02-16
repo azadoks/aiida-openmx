@@ -124,4 +124,3 @@ MIT
 ## Contact
 
 austin.zadoks@epfl.ch
-

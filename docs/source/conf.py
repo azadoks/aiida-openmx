@@ -71,11 +71,11 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'aiida-openmx'
-copyright_first_year = "2021"
-copyright_owners = "Austin Zadoks"
+copyright_first_year = '2021'
+copyright_owners = 'Austin Zadoks'
 
 current_year = str(time.localtime().tm_year)
-copyright_year_string = current_year if current_year == copyright_first_year else "{}-{}".format(
+copyright_year_string = current_year if current_year == copyright_first_year else '{}-{}'.format(
     copyright_first_year, current_year)
 # pylint: disable=redefined-builtin
 copyright = u'{}, {}. All rights reserved'.format(copyright_year_string,
@@ -312,7 +312,7 @@ def run_apidoc(_):
 
     # See https://stackoverflow.com/a/30144019
     env = os.environ.copy()
-    env["SPHINX_APIDOC_OPTIONS"] = 'members,special-members,private-members,undoc-members,show-inheritance'
+    env['SPHINX_APIDOC_OPTIONS'] = 'members,special-members,private-members,undoc-members,show-inheritance'
     subprocess.check_call([cmd_path] + options, env=env)
 
 

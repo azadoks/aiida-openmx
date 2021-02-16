@@ -5,18 +5,18 @@ fast:
     System.Name: "aiida"  # default: None
     level.of.stdout: 1  # default: 1; available: (1, 2, 3)
     level.of.fileout: 1  # default: 1; available: (0, 1, 2)
-    
+
     ## Definition of Atomic Species
     # Species.Number: int
     # Definition.of.Atomic.Species: [[symbol, pao_file, vps_file]]
-    
+
     ## Atoms
     # Atoms.Number: int
     Atoms.SpeciesAndCoordinates.Unit: "Ang"  # available: ("Ang", "AU")
     # Atoms.SpeciesAndCoordinates: [[1-based-index, symbol, x, y, z, up_charge, down_charge]]
     Atoms.UnitVectors.Unit: "Ang"  # available: ("Ang", "AU")
     # Atoms.UnitVectors:  [[u1, u2, u3]]
-    
+
     ## SCF or Electronic System
     scf.XcType: "GGA-PBE"  # available: ("LDA", "LSDA-CA", "LSDA-PW", "GGA-PBE")
     scf.SpinPolarization: "off"  # available: ("on", "off", "nc")

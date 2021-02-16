@@ -3,7 +3,7 @@
     "name": "aiida_openmx_parameters",
     "description": "JSON for describiong the input parameters to OpenMX",
     "version": "0.1.0",
-    "required": [ "Species_Number", "Atoms_Number", "Definition_of_Atomic_Species", "Atoms_SpeciesAndCoordinates", 
+    "required": [ "Species_Number", "Atoms_Number", "Definition_of_Atomic_Species", "Atoms_SpeciesAndCoordinates",
         "Atoms_Unitvectors", "scf_EigenvalueSolver" ],
     "type": "object",
     "properties": {
@@ -160,7 +160,7 @@
             "description": "Method for generating the k-point grid",
             "type": "string",
             "default": "REGULAR",
-            "enum": [ "REGULAR", "MP" ] 
+            "enum": [ "REGULAR", "MP" ]
         },
         "scf_XcType": {
             "description": "Type of exchange-correlation functional",

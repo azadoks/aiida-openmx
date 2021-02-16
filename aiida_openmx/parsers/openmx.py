@@ -19,7 +19,6 @@ STRESS_UNITS = 'GPa'
 
 class OpenmxParser(Parser):
     """Basic parser for OpenMX outputs."""
-    
     def parse(self, **kwargs):
         """Parse outputs and store them in the AiiDA database."""
         try:

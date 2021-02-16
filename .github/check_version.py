@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Check that version numbers match.
 
 Check version number in setup.json and aiida_openmx/__init__.py and make sure
@@ -23,11 +24,9 @@ import aiida_openmx  # pylint: disable=wrong-import-position
 version = aiida_openmx.__version__
 
 if version != setup_content['version']:
-    print("Version number mismatch detected:")
-    print("Version number in '{}': {}".format(setup_fname,
-                                              setup_content['version']))
-    print("Version number in '{}/__init__.py': {}".format(
-        'aiida_openmx', version))
+    print('Version number mismatch detected:')
+    print("Version number in '{}': {}".format(setup_fname, setup_content['version']))
+    print("Version number in '{}/__init__.py': {}".format('aiida_openmx', version))
     sys.exit(1)
 
 # Overwrite version in setup.json

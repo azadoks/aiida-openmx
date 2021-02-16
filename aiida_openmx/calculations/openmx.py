@@ -15,10 +15,11 @@ from aiida_pseudo.data.pseudo import PaoData
 from ..utils._dict import _uppercase_dict
 from ..utils._input import (_BLOCK_PARAMETER_WRITERS, _FORMAT_TYPE_MAPPING,
                             _RESERVED_KEYWORDS, _get_atoms_spec_and_coords,
-                            _get_def_atomic_species, _get_xc_type, write_input_file,
-                            validate_parameters)
+                            _get_def_atomic_species, _get_xc_type,
+                            write_input_file, validate_parameters)
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class OpenmxCalculation(CalcJob):
     """`CalcJob` for OpenMX."""
@@ -83,8 +84,7 @@ class OpenmxCalculation(CalcJob):
         #  yapf: enable
 
     def prepare_for_submission(self, folder: folders.Folder):
-        """
-        Create input files from the input nodes passed to this instance of the `CalcJob`.
+        """Create input files from the input nodes passed to this instance of the `CalcJob`.
 
         :param folder: an `aiida.common.folders.Folder` to temporarily write files on disk
         :return: `aiida.common.datastructures.CalcInfo` instance
@@ -100,7 +100,8 @@ class OpenmxCalculation(CalcJob):
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
-            settings = _uppercase_dict(self.inputs.settings.get_dict(), dict_name='settings')
+            settings = _uppercase_dict(self.inputs.settings.get_dict(),
+                                       dict_name='settings')
         else:
             settings = {}
 
@@ -119,17 +120,20 @@ class OpenmxCalculation(CalcJob):
             schema = json.load(stream)
 
         # Automatically generate input parameters for derived fields, e.g. structure -> Atoms.Unitvectors, etc.
-        parameters = self._generate_input_parameters(self.inputs.structure, self.inputs.kpoints, parameters,
-            self.inputs.pseudos, self.inputs.orbitals, self.inputs.orbital_configurations)
-        
+        parameters = self._generate_input_parameters(
+            self.inputs.structure, self.inputs.kpoints, parameters,
+            self.inputs.pseudos, self.inputs.orbitals,
+            self.inputs.orbital_configurations)
+
         # Validate input parameters
-        self._validate_inputs(self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos,
-            self.inputs.orbitals, schema)
+        self._validate_inputs(self.inputs.structure, self.inputs.kpoints,
+                              parameters, self.inputs.pseudos,
+                              self.inputs.orbitals, schema)
 
         # Get input file contents and lists of the pseudopotential and orbital files which need to be copied
         input_file_content = write_input_file(parameters, schema)
-        local_copy_pseudo_list, local_copy_orbital_list = self._generate_local_copy_lists(self.inputs.pseudos,
-            self.inputs.orbitals)
+        local_copy_pseudo_list, local_copy_orbital_list = self._generate_local_copy_lists(
+            self.inputs.pseudos, self.inputs.orbitals)
 
         local_copy_list += local_copy_pseudo_list
         local_copy_list += local_copy_orbital_list
@@ -162,8 +166,8 @@ class OpenmxCalculation(CalcJob):
 
         return calcinfo
 
-
-    def _generate_input_parameters(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations):
+    def _generate_input_parameters(cls, structure, kpoints, parameters,
+                                   pseudos, orbitals, orbital_configurations):
         parameters = copy.deepcopy(parameters)
 
         parameters['System_Name'] = cls._SYSTEM_NAME
@@ -171,18 +175,19 @@ class OpenmxCalculation(CalcJob):
         parameters['level_of_stdout'] = 3
         parameters['level_of_fileout'] = 3
         parameters['Species_Number'] = len(structure.kinds)
-        parameters['Definition_of_Atomic_Species'] = _get_def_atomic_species(structure, pseudos, orbitals,
-            orbital_configurations)
+        parameters['Definition_of_Atomic_Species'] = _get_def_atomic_species(
+            structure, pseudos, orbitals, orbital_configurations)
         parameters['Atoms_Number'] = len(structure.sites)
-        parameters['Atoms_SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(structure, orbitals)
+        parameters['Atoms_SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(
+            structure, orbitals)
         parameters['Atoms_Unitvectors'] = structure.cell
         parameters['scf_XcType'] = _get_xc_type(pseudos)
         parameters['scf_Kgrid'] = kpoints.get_kpoints_mesh()[0]
 
         return parameters
 
-
-    def _validate_inputs(cls, structure, kpoints, parameters, pseudos, orbitals, schema):
+    def _validate_inputs(cls, structure, kpoints, parameters, pseudos,
+                         orbitals, schema):
         # A pseudopotential should be specified for each kind present in the `StructureData`
         kinds = [kind.name for kind in structure.kinds]
         if set(kinds) != set(pseudos.keys()):
@@ -210,7 +215,7 @@ class OpenmxCalculation(CalcJob):
         for kind in set(kinds):
             if pseudos[kind].z_valence != orbitals[kind].z_valence:
                 inconsistent_z_valence[kind] = (pseudos[kind].z_valence,
-                                              orbitals[kind].z_valence)
+                                                orbitals[kind].z_valence)
         if inconsistent_z_valence:
             raise exceptions.InputValidationError(
                 f'Mismatch between the pseudopotential and orbital valences: {inconsistent_z_valence}.'
