@@ -14,7 +14,7 @@
         "Programming Language :: Python :: 3.8",
         "Development Status :: 3 - Alpha"
     ],
-    "version": "0.1.0a0",
+    "version": "0.1.0a1",
     "entry_points": {
         "aiida.data": [
         ],
