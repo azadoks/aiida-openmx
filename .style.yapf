@@ -1,5 +1,4 @@
 [style]
-[style]
 based_on_style = google
 align_closing_bracket_with_visual_indent = true
 coalesce_brackets = true

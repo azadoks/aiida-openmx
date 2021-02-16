@@ -13,6 +13,5 @@ def clear_database_auto(clear_database):  # pylint: disable=unused-argument
 @pytest.fixture(scope='function')
 def openmx_code(aiida_local_code_factory):
     """Get an openmx code."""
-    openmx_code = aiida_local_code_factory(executable='openmx',
-                                           entry_point='openmx')
+    openmx_code = aiida_local_code_factory(executable='openmx', entry_point='openmx')
     return openmx_code

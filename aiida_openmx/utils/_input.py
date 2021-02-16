@@ -8,76 +8,57 @@ import jsonschema
 import numpy as np
 
 _RESERVED_KEYWORDS = [
-    'System_CurrentDirectory', 'System_Name', 'DATA_PATH', 'level_of_stdout',
-    'level_of_fileout', 'Species_Number', 'Definition_of_Atomic_Species',
-    'scf_XcType', 'scf_Kgrid', 'Atoms_Number',
-    'Atoms_SpeciesAndCoordinates_Unit', 'Atoms_SpeciesAndCoordinates',
-    'Atoms_Unitvectors_Unit', 'Atoms_Unitvectors', 'Atoms_NetCharge',
-    'scf_restart', 'scf_restart_filename', 'Dos_fileout', 'DosGauss_fileout',
-    'FermiSurfer_fileout', 'HS_fileout'
+    'System_CurrentDirectory', 'System_Name', 'DATA_PATH', 'level_of_stdout', 'level_of_fileout', 'Species_Number',
+    'Definition_of_Atomic_Species', 'scf_XcType', 'scf_Kgrid', 'Atoms_Number', 'Atoms_SpeciesAndCoordinates_Unit',
+    'Atoms_SpeciesAndCoordinates', 'Atoms_Unitvectors_Unit', 'Atoms_Unitvectors', 'Atoms_NetCharge', 'scf_restart',
+    'scf_restart_filename', 'Dos_fileout', 'DosGauss_fileout', 'FermiSurfer_fileout', 'HS_fileout'
 ]
 
-_FORMAT_TYPE_MAPPING = {
-    'number': '{:0.12f}',
-    'integer': '{:d}',
-    'string': '{}'
-}
+_FORMAT_TYPE_MAPPING = {'number': '{:0.12f}', 'integer': '{:d}', 'string': '{}'}
 
 _BLOCK_PARAMETER_WRITERS = {
-    'Atoms_SpeciesAndCoordinates':
-    _write_atoms_spec_and_coords,
-    'Atoms_Unitvectors':
-    functools.partial(_write_array_block,
-                      type='number',
-                      tag='Atoms.Unitvectors'),
-    'Definition_of_Atomic_Species':
-    _write_def_atomic_species,
-    'Band_kpath':
-    _write_band_kpath,
-    'Band_kpath_UnitCell':
-    functools.partial(_write_array_block,
-                      type='number',
-                      tag='Band.kpath.UnitCell')
+    'Atoms_SpeciesAndCoordinates': _write_atoms_spec_and_coords,
+    'Atoms_Unitvectors': functools.partial(_write_array_block, item_type='number', tag='Atoms.Unitvectors'),
+    'Definition_of_Atomic_Species': _write_def_atomic_species,
+    'Band_kpath': _write_band_kpath,
+    'Band_kpath_UnitCell': functools.partial(_write_array_block, item_type='number', tag='Band.kpath.UnitCell')
 }
 
 
 def _get_is_int(validator):
     """Create a integer type checker with numpy support for the given validator."""
+
+    # pylint: disable=unused-argument
     def is_int(checker, instance):
-        return (validator.TYPE_CHECKER.is_type(instance, 'integer')
-                or isinstance(instance, np.int16)
-                or isinstance(instance, np.int32)
-                or isinstance(instance, np.int64)
-                or isinstance(instance, np.int128))
+        return (
+            validator.TYPE_CHECKER.is_type(instance, 'integer') or
+            isinstance(instance, (np.int32, np.int64, np.int128))
+        )
 
     return is_int
 
 
 def _get_is_number(validator):
     """Create a number type checker with numpy support for the given validator."""
+
+    # pylint: disable=unused-argument,consider-merging-isinstance
     def is_number(checker, instance):
-        return (validator.TYPE_CHECKER.is_type(instance, 'number')
-                or isinstance(instance, np.int16)
-                or isinstance(instance, np.int32)
-                or isinstance(instance, np.int64)
-                or isinstance(instance, np.int128)
-                or isinstance(instance, np.float16)
-                or isinstance(instance, np.float32)
-                or isinstance(instance, np.float64)
-                or isinstance(instance, np.float128)
-                or isinstance(instance, np.complex64)
-                or isinstance(instance, np.complex128)
-                or isinstance(instance, np.complex256))
+        return (
+            validator.TYPE_CHECKER.is_type(instance, 'number') or
+            isinstance(instance, (np.int16, np.int32, np.int64, np.int128)) or
+            isinstance(instance, (np.float16, np.float32, np.float64, np.float128)) or
+            isinstance(instance, (np.complex64, np.complex128, np.complex256))
+        )
 
     return is_number
 
 
 def _get_is_array(validator):
     """Create an array type checker with numpy support for the given validator."""
+
+    # pylint: disable=unused-argument
     def is_array(checker, instance):
-        return (validator.TYPE_CHECKER.is_type(instance, 'array')
-                or isinstance(instance, tuple)
-                or isinstance(instance, np.ndarray))
+        return (validator.TYPE_CHECKER.is_type(instance, 'array') or isinstance(instance, (tuple, np.ndarray)))
 
     return is_array
 
@@ -89,8 +70,7 @@ def _get_validator(schema):
     type_checker = type_checker.redefine('integer', _get_is_int(validator))
     type_checker = type_checker.redefine('number', _get_is_number(validator))
     type_checker = type_checker.redefine('array', _get_is_array(validator))
-    OpenmxValidator = jsonschema.validators.extend(validator,
-                                                   type_checker=type_checker)
+    OpenmxValidator = jsonschema.validators.extend(validator, type_checker=type_checker)
     return OpenmxValidator(schema)
 
 
@@ -117,17 +97,14 @@ def _get_xc_type(pseudos):
     return xc_set.pop()
 
 
-def _get_def_atomic_species(structure, pseudos, orbitals,
-                            orbital_configurations):
+def _get_def_atomic_species(structure, pseudos, orbitals, orbital_configurations):
     """Construct the `Definition.of.Atomic.Species` parameter dictionary."""
     def_atomic_species = {}
     for kind in structure.kinds:
         def_atomic_species[kind.name] = {
             'pao': {
-                'file_stem':
-                splitext(orbitals[kind.name].filename)[0],
-                'orbital_configuration':
-                orbital_configurations.get_array(kind.name)
+                'file_stem': splitext(orbitals[kind.name].filename)[0],
+                'orbital_configuration': orbital_configurations.get_array(kind.name)
             },
             'pseudo': splitext(pseudos[kind.name].filename)[0]
         }
@@ -161,13 +138,9 @@ def _write_def_atomic_species(def_atomic_species):
     lines = []
     for specie, data in def_atomic_species.items():
         orbital_config = ''.join([
-            f'{ORB_MAP[i]}{n_orb}'
-            for i, n_orb in enumerate(data['pao']['orbital_configuration'])
-            if n_orb != 0
+            f'{ORB_MAP[i]}{n_orb}' for i, n_orb in enumerate(data['pao']['orbital_configuration']) if n_orb != 0
         ])
-        lines.append(
-            f'{specie} {data["pao"]["file_stem"]}-{orbital_config} {data["pseudo"]}'
-        )
+        lines.append(f'{specie} {data["pao"]["file_stem"]}-{orbital_config} {data["pseudo"]}')
     block = _tag_block('\n'.join(lines), TAG)
     return block
 
@@ -182,27 +155,24 @@ def _write_atoms_spec_and_coords(atoms_spec_and_coords):
         x, y, z = data['coords']
         up_charge = data['up_charge']
         down_charge = data['down_charge']
-        lines.append(
-            f'{index:d} {kind_name} {x:0.12f} {y:0.12f} {z:0.12f} {up_charge:0.6f} {down_charge:0.6f}'
-        )
+        lines.append(f'{index:d} {kind_name} {x:0.12f} {y:0.12f} {z:0.12f} {up_charge:0.6f} {down_charge:0.6f}')
     block = _tag_block('\n'.join(lines), TAG)
     return block
 
 
 def _write_band_kpath():
     """Write the `Band.kpath` input block."""
-    TAG = 'Band.kpath'
-    return None
+    # TAG = 'Band.kpath'
 
 
-def _write_array_block(array, type, tag):
+def _write_array_block(array, item_type, tag):
     """Write an array input block.
 
     :param array: Array data to write
     :param type: JSON schema type of the items of the array
     :returns: OpenMX-formatted array input block
     """
-    type_format = _FORMAT_TYPE_MAPPING[type]
+    type_format = _FORMAT_TYPE_MAPPING[item_type]
     lines = []
     for row in array:
         lines.append(' '.join([type_format.format(item) for item in row]))
@@ -227,15 +197,11 @@ def write_input_file(parameters, schema):
         elif value_type == 'array':
             item_type = schema['properties'][kw]['items']['type']
             item_format = _FORMAT_TYPE_MAPPING[item_type]
-            param_content = ' '.join([kw.replace(
-                '_', '.')] + [item_format.format(item)
-                              for item in value]) + '\n'
+            param_content = ' '.join([kw.replace('_', '.')] + [item_format.format(item) for item in value]) + '\n'
         # Scalar values
         else:
             value_format = _FORMAT_TYPE_MAPPING[value_type]
-            param_content = ' '.join(
-                [kw.replace('_', '.'),
-                 value_format.format(value)]) + '\n'
+            param_content = ' '.join([kw.replace('_', '.'), value_format.format(value)]) + '\n'
         input_file_content += param_content
 
     return input_file_content

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Set up aiida-openmx."""
+
 from setuptools import setup, find_packages
 import json
 
@@ -15,4 +17,5 @@ if __name__ == '__main__':
         },
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown',
-        **kwargs)
+        **kwargs
+    )

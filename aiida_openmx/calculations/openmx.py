@@ -5,18 +5,17 @@ import copy
 import json
 import os
 
-import numpy as np
 from aiida import orm
 from aiida.common import datastructures, exceptions, folders
 from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
 from aiida_pseudo.data.pseudo import PaoData
 
-from ..utils._dict import _uppercase_dict
-from ..utils._input import (_BLOCK_PARAMETER_WRITERS, _FORMAT_TYPE_MAPPING,
-                            _RESERVED_KEYWORDS, _get_atoms_spec_and_coords,
-                            _get_def_atomic_species, _get_xc_type,
-                            write_input_file, validate_parameters)
+from aiida_openmx.utils._dict import _uppercase_dict
+from aiida_openmx.utils._input import (
+    _RESERVED_KEYWORDS, _get_atoms_spec_and_coords, _get_def_atomic_species, _get_xc_type, write_input_file,
+    validate_parameters
+)
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -83,6 +82,7 @@ class OpenmxCalculation(CalcJob):
         # Significant errors: calculation can be used to restart
         #  yapf: enable
 
+    # pylint: disable=too-many-locals
     def prepare_for_submission(self, folder: folders.Folder):
         """Create input files from the input nodes passed to this instance of the `CalcJob`.
 
@@ -100,8 +100,7 @@ class OpenmxCalculation(CalcJob):
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
-            settings = _uppercase_dict(self.inputs.settings.get_dict(),
-                                       dict_name='settings')
+            settings = _uppercase_dict(self.inputs.settings.get_dict(), dict_name='settings')
         else:
             settings = {}
 
@@ -121,19 +120,20 @@ class OpenmxCalculation(CalcJob):
 
         # Automatically generate input parameters for derived fields, e.g. structure -> Atoms.Unitvectors, etc.
         parameters = self._generate_input_parameters(
-            self.inputs.structure, self.inputs.kpoints, parameters,
-            self.inputs.pseudos, self.inputs.orbitals,
-            self.inputs.orbital_configurations)
+            self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos, self.inputs.orbitals,
+            self.inputs.orbital_configurations
+        )
 
         # Validate input parameters
-        self._validate_inputs(self.inputs.structure, self.inputs.kpoints,
-                              parameters, self.inputs.pseudos,
-                              self.inputs.orbitals, schema)
+        self._validate_inputs(
+            self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos, self.inputs.orbitals, schema
+        )
 
         # Get input file contents and lists of the pseudopotential and orbital files which need to be copied
         input_file_content = write_input_file(parameters, schema)
         local_copy_pseudo_list, local_copy_orbital_list = self._generate_local_copy_lists(
-            self.inputs.pseudos, self.inputs.orbitals)
+            self.inputs.pseudos, self.inputs.orbitals
+        )
 
         local_copy_list += local_copy_pseudo_list
         local_copy_list += local_copy_orbital_list
@@ -146,8 +146,7 @@ class OpenmxCalculation(CalcJob):
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
         cmdline_params = settings.pop('CMDLINE', [])
-        codeinfo.cmdline_params = ([self.metadata.options.input_filename] +
-                                   list(cmdline_params))
+        codeinfo.cmdline_params = ([self.metadata.options.input_filename] + list(cmdline_params))
         codeinfo.stdout_name = self.metadata.options.output_filename
 
         # Fill out the `CalcInfo`
@@ -166,8 +165,8 @@ class OpenmxCalculation(CalcJob):
 
         return calcinfo
 
-    def _generate_input_parameters(cls, structure, kpoints, parameters,
-                                   pseudos, orbitals, orbital_configurations):
+    # pylint: disable=too-many-arguments
+    def _generate_input_parameters(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations):
         parameters = copy.deepcopy(parameters)
 
         parameters['System_Name'] = cls._SYSTEM_NAME
@@ -176,25 +175,25 @@ class OpenmxCalculation(CalcJob):
         parameters['level_of_fileout'] = 3
         parameters['Species_Number'] = len(structure.kinds)
         parameters['Definition_of_Atomic_Species'] = _get_def_atomic_species(
-            structure, pseudos, orbitals, orbital_configurations)
+            structure, pseudos, orbitals, orbital_configurations
+        )
         parameters['Atoms_Number'] = len(structure.sites)
-        parameters['Atoms_SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(
-            structure, orbitals)
+        parameters['Atoms_SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(structure, orbitals)
         parameters['Atoms_Unitvectors'] = structure.cell
         parameters['scf_XcType'] = _get_xc_type(pseudos)
         parameters['scf_Kgrid'] = kpoints.get_kpoints_mesh()[0]
 
         return parameters
 
-    def _validate_inputs(cls, structure, kpoints, parameters, pseudos,
-                         orbitals, schema):
+    # pylint: disable=too-many-arguments
+    def _validate_inputs(cls, structure, kpoints, parameters, pseudos, orbitals, schema):
         # A pseudopotential should be specified for each kind present in the `StructureData`
         kinds = [kind.name for kind in structure.kinds]
         if set(kinds) != set(pseudos.keys()):
             raise exceptions.InputValidationError(
                 'Mismatch between the defined pseudos and the list of kinds of the structure.\n'
-                'Pseudos: {};\nKinds: {}'.format(', '.join(list(
-                    pseudos.keys()))), ', '.join(list(kinds)))
+                'Pseudos: {};\nKinds: {}'.format(', '.join(list(pseudos.keys())), ', '.join(list(kinds)))
+            )
 
         # All pseudopotentials should have the same exchange-correlation type
         xc_set = {pseudo.xc_type for pseudo in pseudos.values()}
@@ -207,15 +206,14 @@ class OpenmxCalculation(CalcJob):
         if set(kinds) != set(orbitals.keys()):
             raise exceptions.InputValidationError(
                 'Mismatch between the defined orbitals and the list of kinds of the structure.\n'
-                'Orbitals: {};\nKinds: {}'.format(', '.join(
-                    list(orbitals.keys()))), ', '.join(list(kinds)))
+                'Orbitals: {};\nKinds: {}'.format(', '.join(list(orbitals.keys())), ', '.join(list(kinds)))
+            )
 
         # Corresponding orbital bases and pseudopotentials should have the same Z-valence
         inconsistent_z_valence = {}
         for kind in set(kinds):
             if pseudos[kind].z_valence != orbitals[kind].z_valence:
-                inconsistent_z_valence[kind] = (pseudos[kind].z_valence,
-                                                orbitals[kind].z_valence)
+                inconsistent_z_valence[kind] = (pseudos[kind].z_valence, orbitals[kind].z_valence)
         if inconsistent_z_valence:
             raise exceptions.InputValidationError(
                 f'Mismatch between the pseudopotential and orbital valences: {inconsistent_z_valence}.'
@@ -227,19 +225,16 @@ class OpenmxCalculation(CalcJob):
         except AttributeError:
             raise exceptions.InputValidationError(
                 'Explicit k-points are not yet supported. Instead, set a k-points mesh using '
-                'KpointsData.set_kpoints_mesh().')
+                'KpointsData.set_kpoints_mesh().'
+            )
 
         # Validate against the JSON schema
         validate_parameters(schema, parameters)
 
     def _generate_local_copy_lists(cls, pseudos, orbitals):
-        pseudo_file_list = [(pseudo.uuid, pseudo.filename,
-                             os.path.join(cls._PSEUDO_SUBFOLDER,
-                                          pseudo.filename))
+        pseudo_file_list = [(pseudo.uuid, pseudo.filename, os.path.join(cls._PSEUDO_SUBFOLDER, pseudo.filename))
                             for pseudo in pseudos.values()]
-        orbital_file_list = [(orbital.uuid, orbital.filename,
-                              os.path.join(cls._ORBITAL_SUBFOLDER,
-                                           orbital.filename))
+        orbital_file_list = [(orbital.uuid, orbital.filename, os.path.join(cls._ORBITAL_SUBFOLDER, orbital.filename))
                              for orbital in orbitals.values()]
 
         return pseudo_file_list, orbital_file_list
