@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""`CalcJob` for OpenMX."""
+"""`CalcJob` for OpenMX `openmx`."""
 
 import copy
 import json
@@ -11,7 +11,7 @@ from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
 from aiida_pseudo.data.pseudo import PaoData
 
-from aiida_openmx.utils._dict import _uppercase_dict
+from aiida_openmx.utils._dict import _uppercase_dict_keys, _lowercase_dict_values
 from aiida_openmx.utils._input import (
     _RESERVED_KEYWORDS, _get_atoms_spec_and_coords, _get_def_atomic_species, _get_xc_type, write_input_file,
     validate_parameters
@@ -27,7 +27,17 @@ class OpenmxCalculation(CalcJob):
     _PSEUDO_SUBFOLDER = _DATA_PATH + 'VPS/'
     _ORBITAL_SUBFOLDER = _DATA_PATH + 'PAO/'
     _SYSTEM_NAME = 'aiida'
-    _INPUT_SCHEMA = os.path.join(_DIR, '../schema/openmx-input-schema.json')
+    _INPUT_SCHEMA = os.path.join(_DIR, '../schema/openmx-input-schema-upper.json')
+
+    _DATAFILE_DOS_VAL_FILE = _SYSTEM_NAME + '.Dos.val'
+    _DATAFILE_DOS_VEC_FILE = _SYSTEM_NAME + '.Dos.vec'
+    _DATAFILE_BAND_FILE = _SYSTEM_NAME + '.Band'
+    _DATAFILE_XYZ_FILE = _SYSTEM_NAME + '.xyz'
+    _DATAFILE_BULK_XYZ_FILE = _SYSTEM_NAME + '.bulk.xyz'
+    _DATAFILE_MD_FILE = _SYSTEM_NAME + '.md'
+    _DATAFILE_MD2_FILE = _SYSTEM_NAME + '.md2'
+    _DATAFILE_CIF_FILE = _SYSTEM_NAME + '.cif'
+    _DATAFILE_ENE_FILE = _SYSTEM_NAME + '.ene'
 
     _RETRIEVE_LIST = []
 
@@ -70,16 +80,51 @@ class OpenmxCalculation(CalcJob):
         ## Outputs
         spec.output('output_parameters', valid_type=orm.Dict,
             help='The `output_parameters` output node of the successful calculation.')
-        spec.output('output_structure', valid_type=orm.StructureData,
+        # spec.output('output_timing', valid_type=orm.Dict,
+        #     help='The `oputput_timing` output node of the successful calculation.')
+        spec.output('output_structure', valid_type=orm.StructureData, required=False,
             help='The `output_structure` output node of the successful calculation if present.')
         spec.output('output_trajectory', valid_type=orm.Dict, required=False,
             help='The `output_trajectory` output node of the successful calculation if present.')
         spec.output('output_band', valid_type=orm.BandsData, required=False,
             help='The `output_band` output node of the successful calculation if present.')
+        spec.output('output_dos', valid_type=orm.ArrayData, required=False,
+            help='The `output_dos` output node of the successful calculation if present.')
 
         ## Errors
         # Unrecoverable errors: required retrieve files could not be read, parsed, or are otherwise incomplete
+        spec.exit_code(301, 'ERROR_NO_RETRIEVED_TEMPORARY_FOLDER',
+            message='The retrieved temporary folder could not be accessed.')
+        spec.exit_code(302, 'ERROR_OUTPUT_STDOUT_MISSING',
+            message='The retrieved folder did not contain the required stdout output file.')
+        spec.exit_code(303, 'ERROR_OUTPUT_DOS_MISSING',
+            message='The retrieved folder did not contain the required dos output file.')
+        spec.exit_code(310, 'ERROR_OUTPUT_STDOUT_READ',
+            message='The stdout output file could not be read.')
+        spec.exit_code(311, 'ERROR_OUTPUT_STDOUT_PARSE',
+            message='The stdout output file could not be parsed.')
+        spec.exit_code(312, 'ERROR_OUTPUT_STDOUT_INCOMPLETE',
+            message='The stdout output file was incomplete probably because the calculation was interrupted.')
+        spec.exit_code(313, 'ERROR_OUTPUT_DOS_READ',
+            message='The dos output file could not be read.')
+        spec.exit_code(314, 'ERROR_OUTPUT_DOS_PARSE',
+            message='The dos output file could not be parsed.')
+        spec.exit_code(315, 'ERRO_OUTPUT_DOS_INCOMPLETE',
+            message='The dos output file was incomplete probably because the calculation was interrupted.')
+        spec.exit_code(350, 'ERROR_UNEXPECTED_PARSER_EXCEPTION',
+            message='The parser raised an unexpected exception.')
         # Significant errors: calculation can be used to restart
+        spec.exit_code(400, 'ERROR_OUT_OF_WALLTIME',
+            message='The calculation stopped prematurely because it ran out of walltime.')
+        spec.exit_code(410, 'ERROR_ELECTRONIC_CONVERGENCE_NOT_REACHED',
+            message='The electronic minimization cycle did not reach self-consistency.')
+        spec.exit_code(500, 'ERROR_IONIC_CONVERGENCE_NOT_REACHED',
+            message='The ionic minimization cycle did not converge for the given thresholds.')
+        spec.exit_code(502, 'ERROR_IONIC_CYCLE_EXCEEDED_NSTEP',
+            message='The ionic minimization cycle did not converge after the maximum number of steps.')
+        spec.exit_code(510, 'ERROR_IONIC_CYCLE_ELECTRONIC_CONVERGENCE_NOT_REACHED',
+            message='The electronic minimization cycle failed during an ionic minimization cycle.')
+
         #  yapf: enable
 
     # pylint: disable=too-many-locals
@@ -100,12 +145,14 @@ class OpenmxCalculation(CalcJob):
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
-            settings = _uppercase_dict(self.inputs.settings.get_dict(), dict_name='settings')
+            settings = _uppercase_dict_keys(self.inputs.settings.get_dict(), dict_name='settings')
         else:
             settings = {}
 
+        # Get an uppercase-key-only verion of the parameters dictionary (also check for case-insensitive duplicates)
+        parameters = _uppercase_dict_keys(self.inputs.parameters.get_dict(), dict_name='parameters')
+
         # No reserved parameter keywords should be provided
-        parameters = self.inputs.parameters.get_dict()
         self._check_reserved_keywords(parameters)
 
         # Load parameter schema
@@ -117,6 +164,9 @@ class OpenmxCalculation(CalcJob):
             self.inputs.structure, self.inputs.kpoints, parameters, self.inputs.pseudos, self.inputs.orbitals,
             self.inputs.orbital_configurations
         )
+
+        # Get a lowercase-value-only version of the parameters dictionary
+        parameters = _lowercase_dict_values(parameters)
 
         # Validate input parameters
         self._validate_inputs(
@@ -132,6 +182,14 @@ class OpenmxCalculation(CalcJob):
 
         local_copy_list += local_copy_pseudo_list
         local_copy_list += local_copy_orbital_list
+
+        # Add output files to retrieve which have been specified to write in the input parameters
+        retrieve_list = []
+        if parameters.get('DOS_FILEOUT', False):
+            retrieve_list.append(self._DATAFILE_DOS_VAL_FILE)
+            retrieve_list.append(self._DATAFILE_DOS_VEC_FILE)
+        if parameters.get('BAND_NKPATH', 0) > 0:
+            retrieve_list.append(self._DATAFILE_BAND_FILE)
 
         # Write input file
         with folder.open(self.metadata.options.input_filename, 'w') as handle:
@@ -151,7 +209,7 @@ class OpenmxCalculation(CalcJob):
         calcinfo.local_copy_list = local_copy_list
         calcinfo.remote_copy_list = remote_copy_list
         calcinfo.remote_symlink_list = remote_symlink_list
-        calcinfo.retrieve_list = []
+        calcinfo.retrieve_list = retrieve_list
         calcinfo.retrieve_list.append(self.metadata.options.output_filename)
         calcinfo.retrieve_list += self._RETRIEVE_LIST
         calcinfo.retrieve_list += settings.pop('ADDITIONAL_RETRIEVE_LIST', [])
@@ -164,19 +222,19 @@ class OpenmxCalculation(CalcJob):
     def _generate_input_parameters(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations):
         parameters = copy.deepcopy(parameters)
 
-        parameters['System_Name'] = cls._SYSTEM_NAME
+        parameters['SYSTEM_NAME'] = cls._SYSTEM_NAME
         parameters['DATA_PATH'] = cls._DATA_PATH
-        parameters['level_of_stdout'] = 3
-        parameters['level_of_fileout'] = 3
-        parameters['Species_Number'] = len(structure.kinds)
-        parameters['Definition_of_Atomic_Species'] = _get_def_atomic_species(
+        parameters['LEVEL_OF_STDOUT'] = 3
+        parameters['LEVEL_OF_FILEOUT'] = 0
+        parameters['SPECIES_NUMBER'] = len(structure.kinds)
+        parameters['DEFINITION_OF_ATOMIC_SPECIES'] = _get_def_atomic_species(
             structure, pseudos, orbitals, orbital_configurations
         )
-        parameters['Atoms_Number'] = len(structure.sites)
-        parameters['Atoms_SpeciesAndCoordinates'] = _get_atoms_spec_and_coords(structure, orbitals)
-        parameters['Atoms_Unitvectors'] = structure.cell
-        parameters['scf_XcType'] = _get_xc_type(pseudos)
-        parameters['scf_Kgrid'] = kpoints.get_kpoints_mesh()[0]
+        parameters['ATOMS_NUMBER'] = len(structure.sites)
+        parameters['ATOMS_SPECIESANDCOORDINATES'] = _get_atoms_spec_and_coords(structure, orbitals)
+        parameters['ATOMS_UNITVECTORS'] = structure.cell
+        parameters['SCF_XCTYPE'] = _get_xc_type(pseudos)
+        parameters['SCF_KGRID'] = kpoints.get_kpoints_mesh()[0]
 
         return parameters
 

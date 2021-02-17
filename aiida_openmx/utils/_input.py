@@ -8,21 +8,27 @@ import jsonschema
 import numpy as np
 
 _RESERVED_KEYWORDS = [
-    'System_CurrentDirectory', 'System_Name', 'DATA_PATH', 'level_of_stdout', 'level_of_fileout', 'Species_Number',
-    'Definition_of_Atomic_Species', 'scf_XcType', 'scf_Kgrid', 'Atoms_Number', 'Atoms_SpeciesAndCoordinates_Unit',
-    'Atoms_SpeciesAndCoordinates', 'Atoms_Unitvectors_Unit', 'Atoms_Unitvectors', 'Atoms_NetCharge', 'scf_restart',
-    'scf_restart_filename', 'Dos_fileout', 'DosGauss_fileout', 'FermiSurfer_fileout', 'HS_fileout'
+    'SYSTEM_CURRRENTDIRECTORY',
+    'SYSTEM_NAME',
+    'DATA_PATH',
+    'LEVEL_OF_STDOUT',
+    'LEVEL_OF_FILEOUT',
+    'SPECIES_NUMBER',
+    'DEFINITION_OF_ATOMIC_SPECIES',
+    'SCF_XCTYPE',
+    'SCF_KGRID',
+    'ATOMS_NUMBER',
+    'ATOMS_SPECIESANDCOORDINATES_UNIT',
+    'ATOMS_SPECIESANDCOORDINATES',
+    'ATOMS_UNITVECTORS_UNIT',
+    'ATOMS_UNITVECTORS',
+    'ATOMS_NETCHARGE',
+    'SCF_RESTART',
+    'SCF_RESTART_FILENAME',
+    # 'DOS_FILEOUT', 'DOSGAUSS_FILEOUT', 'FERMISURFER_FILEOUT', 'HS_FILEOUT'
 ]
 
 _FORMAT_TYPE_MAPPING = {'number': '{:0.12f}', 'integer': '{:d}', 'string': '{}'}
-
-_BLOCK_PARAMETER_WRITERS = {
-    'Atoms_SpeciesAndCoordinates': _write_atoms_spec_and_coords,
-    'Atoms_Unitvectors': functools.partial(_write_array_block, item_type='number', tag='Atoms.Unitvectors'),
-    'Definition_of_Atomic_Species': _write_def_atomic_species,
-    'Band_kpath': _write_band_kpath,
-    'Band_kpath_UnitCell': functools.partial(_write_array_block, item_type='number', tag='Band.kpath.UnitCell')
-}
 
 
 def _get_is_int(validator):
@@ -30,10 +36,7 @@ def _get_is_int(validator):
 
     # pylint: disable=unused-argument
     def is_int(checker, instance):
-        return (
-            validator.TYPE_CHECKER.is_type(instance, 'integer') or
-            isinstance(instance, (np.int32, np.int64, np.int128))
-        )
+        return (validator.TYPE_CHECKER.is_type(instance, 'integer') or isinstance(instance, (np.int32, np.int64)))
 
     return is_int
 
@@ -44,8 +47,8 @@ def _get_is_number(validator):
     # pylint: disable=unused-argument,consider-merging-isinstance
     def is_number(checker, instance):
         return (
-            validator.TYPE_CHECKER.is_type(instance, 'number') or
-            isinstance(instance, (np.int16, np.int32, np.int64, np.int128)) or
+            validator.TYPE_CHECKER.is_type(instance, 'number') or isinstance(instance,
+                                                                             (np.int16, np.int32, np.int64)) or
             isinstance(instance, (np.float16, np.float32, np.float64, np.float128)) or
             isinstance(instance, (np.complex64, np.complex128, np.complex256))
         )
@@ -89,7 +92,7 @@ def validate_parameters(schema, parameters):
 
 
 def _get_xc_type(pseudos):
-    """Get the `scf_XcType` parameter from a set of pseudos."""
+    """Get the `SCF_XCTYPE` parameter from a set of pseudos."""
     xc_set = {pseudo.xc_type for pseudo in pseudos.values()}
     if len(xc_set) != 1:
         msg = 'The provided pseudos have inconsistent exchange-correlation type.'
@@ -98,7 +101,7 @@ def _get_xc_type(pseudos):
 
 
 def _get_def_atomic_species(structure, pseudos, orbitals, orbital_configurations):
-    """Construct the `Definition.of.Atomic.Species` parameter dictionary."""
+    """Construct the `DEFINITION.OF.ATOMIC.SPECIES` parameter dictionary."""
     def_atomic_species = {}
     for kind in structure.kinds:
         def_atomic_species[kind.name] = {
@@ -112,7 +115,7 @@ def _get_def_atomic_species(structure, pseudos, orbitals, orbital_configurations
 
 
 def _get_atoms_spec_and_coords(structure, orbitals):
-    """Construct the `Atoms.SpeciesAndCoordinates` parameter dictionary."""
+    """Construct the `ATOMS.SPECIESANDCOORDINATES` parameter dictionary."""
     atoms_spec_and_coords = []
     for site in structure.sites:
         kind_name = site.kind_name
@@ -132,9 +135,9 @@ def _tag_block(block, tag):
 
 
 def _write_def_atomic_species(def_atomic_species):
-    """Write the `Definition_of_Atomic_Species` input block."""
+    """Write the `DEFINITION_OF_ATOMIC_SPECIES` input block."""
     ORB_MAP = {0: 's', 1: 'p', 2: 'd', 3: 'f'}
-    TAG = 'Definition.of.Atomic.Species'
+    TAG = 'DEFINITION.OF.ATOMIC.SPECIES'
     lines = []
     for specie, data in def_atomic_species.items():
         orbital_config = ''.join([
@@ -146,8 +149,8 @@ def _write_def_atomic_species(def_atomic_species):
 
 
 def _write_atoms_spec_and_coords(atoms_spec_and_coords):
-    """Write the `Atoms.SpeciesAndCoordinates` input block."""
-    TAG = 'Atoms.SpeciesAndCoordinates'
+    """Write the `ATOMS.SPECIESANDCOORDINATES` input block."""
+    TAG = 'ATOMS.SPECIESANDCOORDINATES'
     lines = []
     for i, data in enumerate(atoms_spec_and_coords):
         index = i + 1
@@ -161,8 +164,8 @@ def _write_atoms_spec_and_coords(atoms_spec_and_coords):
 
 
 def _write_band_kpath():
-    """Write the `Band.kpath` input block."""
-    # TAG = 'Band.kpath'
+    """Write the `BAND.KPATH` input block."""
+    # TAG = 'BAND.KPATH'
 
 
 def _write_array_block(array, item_type, tag):
@@ -178,6 +181,15 @@ def _write_array_block(array, item_type, tag):
         lines.append(' '.join([type_format.format(item) for item in row]))
     block = _tag_block('\n'.join(lines), tag)
     return block
+
+
+_BLOCK_PARAMETER_WRITERS = {
+    'ATOMS_SPECIESANDCOORDINATES': _write_atoms_spec_and_coords,
+    'ATOMS_UNITVECTORS': functools.partial(_write_array_block, item_type='number', tag='ATOMS.UNITVECTORS'),
+    'DEFINITION_OF_ATOMIC_SPECIES': _write_def_atomic_species,
+    'BAND_KPATH': _write_band_kpath,
+    'BAND_KPATH_UNITCELL': functools.partial(_write_array_block, item_type='number', tag='BAND.KPATH.UNITCELL')
+}
 
 
 def write_input_file(parameters, schema):
