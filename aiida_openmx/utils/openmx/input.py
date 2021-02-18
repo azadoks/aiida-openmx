@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Input utilities and constants."""
+"""Input utilities and constants for `openmx`."""
 
 from os.path import splitext
 import functools

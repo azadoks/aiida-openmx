@@ -7,12 +7,13 @@ import os
 
 from aiida import orm
 from aiida.common import datastructures, exceptions, folders
+from aiida.common.lang import classproperty
 from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
 from aiida_pseudo.data.pseudo import PaoData
 
 from aiida_openmx.utils._dict import _uppercase_dict_keys, _lowercase_dict_values
-from aiida_openmx.utils._input import (
+from aiida_openmx.utils.openmx.input import (
     _RESERVED_KEYWORDS, _get_atoms_spec_and_coords, _get_def_atomic_species, _get_xc_type, write_input_file,
     validate_parameters
 )
@@ -21,12 +22,14 @@ _DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class OpenmxCalculation(CalcJob):
-    """`CalcJob` for OpenMX."""
+    """`CalcJob` for OpenMX `openmx`."""
 
     _DATA_PATH = './'
     _PSEUDO_SUBFOLDER = _DATA_PATH + 'VPS/'
     _ORBITAL_SUBFOLDER = _DATA_PATH + 'PAO/'
     _SYSTEM_NAME = 'aiida'
+    _INPUT_FILE = _SYSTEM_NAME + '.in'
+    _OUTPUT_FILE = _SYSTEM_NAME + '.out'
     _INPUT_SCHEMA = os.path.join(_DIR, '../schema/openmx-input-schema-upper.json')
 
     _DATAFILE_DOS_VAL_FILE = _SYSTEM_NAME + '.Dos.val'
@@ -39,11 +42,42 @@ class OpenmxCalculation(CalcJob):
     _DATAFILE_CIF_FILE = _SYSTEM_NAME + '.cif'
     _DATAFILE_ENE_FILE = _SYSTEM_NAME + '.ene'
 
-    _RETRIEVE_LIST = []
-
-    _DEFAULT_INPUT_FILE = 'aiida.in'
-    _DEFAULT_OUTPUT_FILE = 'aiida.out'
     _DEFAULT_PARSER_NAME = 'openmx.openmx'
+
+    @classproperty
+    def system_name(cls):
+        """Return the system name."""
+        # pylint: disable=no-self-argument
+        return cls._SYSTEM_NAME
+
+    @classproperty
+    def dos_filenames(cls):
+        """Return a dictionary of DOS output filenames that could be written by a calculation.
+
+        Note that these will not be written unless the OpenMX input parameter `DOS_FILEOUT` is True
+        """
+        # pylint: disable=no-self-argument
+        return {'val': cls._DATAFILE_DOS_VAL_FILE, 'vec': cls._DATAFILE_DOS_VEC_FILE}
+
+    @classproperty
+    def md_filenames(cls):
+        """Return a dictionary of MD output filenames that could be written by a calculation.
+
+        Note that these will not be written unless the OpenMX input parameter `MD_TYPE` is not `nomd`
+        """
+        # pylint: disable=no-self-argument
+        return {'md': cls._DATAFILE_MD_FILE, 'md2': cls._DATAFILE_MD2_FILE}
+
+    @classproperty
+    def band_filename(cls):
+        """Return the band output filename that could be written by a calculation.
+
+        Note that this will not be written unless the OpenMX input parameters include:
+            - `BAND_NKPATH != 0`
+            - `SCF_EIGENVALUESOLVER == band`
+        """
+        #pylint: disable=no-self-argument
+        return cls._DATAFILE_BAND_FILE
 
     @classmethod
     def define(cls, spec):
@@ -53,10 +87,7 @@ class OpenmxCalculation(CalcJob):
 
         ## Inputs
         # Metadata
-        spec.input('metadata.options.input_filename', valid_type=str, default=cls._DEFAULT_INPUT_FILE)
-        spec.input('metadata.options.output_filename', valid_type=str, default=cls._DEFAULT_OUTPUT_FILE)
         spec.input('metadata.options.parser_name', valid_type=str, default=cls._DEFAULT_PARSER_NAME)
-        spec.input('metadata.options.withmpi', valid_type=bool, default=True)  # TODO: make this _always_ True
         spec.input('metadata.options.resources', valid_type=dict,
             default={'num_machines': 1, 'num_mpiprocs_per_machine': 1})
         # Pure inputs
@@ -80,16 +111,10 @@ class OpenmxCalculation(CalcJob):
         ## Outputs
         spec.output('output_parameters', valid_type=orm.Dict,
             help='The `output_parameters` output node of the successful calculation.')
-        # spec.output('output_timing', valid_type=orm.Dict,
-        #     help='The `oputput_timing` output node of the successful calculation.')
         spec.output('output_structure', valid_type=orm.StructureData, required=False,
             help='The `output_structure` output node of the successful calculation if present.')
         spec.output('output_trajectory', valid_type=orm.Dict, required=False,
             help='The `output_trajectory` output node of the successful calculation if present.')
-        spec.output('output_band', valid_type=orm.BandsData, required=False,
-            help='The `output_band` output node of the successful calculation if present.')
-        spec.output('output_dos', valid_type=orm.ArrayData, required=False,
-            help='The `output_dos` output node of the successful calculation if present.')
 
         ## Errors
         # Unrecoverable errors: required retrieve files could not be read, parsed, or are otherwise incomplete
@@ -185,22 +210,22 @@ class OpenmxCalculation(CalcJob):
 
         # Add output files to retrieve which have been specified to write in the input parameters
         retrieve_list = []
-        if parameters.get('DOS_FILEOUT', False):
-            retrieve_list.append(self._DATAFILE_DOS_VAL_FILE)
-            retrieve_list.append(self._DATAFILE_DOS_VEC_FILE)
-        if parameters.get('BAND_NKPATH', 0) > 0:
+        if parameters.get('BAND_NKPATH', 0) > 0 and parameters.get('SCF_EIGENVALUESOLVER', 'band') == 'band':
             retrieve_list.append(self._DATAFILE_BAND_FILE)
+        if parameters.get('MD_TYPE', 'nomd') != 'nomd':
+            retrieve_list.append(self._DATAFILE_MD_FILE)
+            retrieve_list.append(self._DATAFILE_MD2_FILE)
 
         # Write input file
-        with folder.open(self.metadata.options.input_filename, 'w') as handle:
+        with folder.open(self._INPUT_FILE, 'w') as handle:
             handle.write(input_file_content)
 
         # Fill out the `CodeInfo`
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
-        cmdline_params = settings.pop('CMDLINE', [])
-        codeinfo.cmdline_params = ([self.metadata.options.input_filename] + list(cmdline_params))
-        codeinfo.stdout_name = self.metadata.options.output_filename
+        codeinfo.with_mpi = True
+        codeinfo.cmdline_params = ([self._INPUT_FILE] + list(settings.pop('CMDLINE', [])))
+        codeinfo.stdout_name = self._OUTPUT_FILE
 
         # Fill out the `CalcInfo`
         calcinfo = datastructures.CalcInfo()
@@ -210,8 +235,7 @@ class OpenmxCalculation(CalcJob):
         calcinfo.remote_copy_list = remote_copy_list
         calcinfo.remote_symlink_list = remote_symlink_list
         calcinfo.retrieve_list = retrieve_list
-        calcinfo.retrieve_list.append(self.metadata.options.output_filename)
-        calcinfo.retrieve_list += self._RETRIEVE_LIST
+        calcinfo.retrieve_list.append(self._OUTPUT_FILE)
         calcinfo.retrieve_list += settings.pop('ADDITIONAL_RETRIEVE_LIST', [])
 
         # TODO: pop parser settings and report remaining unknown settings
@@ -219,11 +243,11 @@ class OpenmxCalculation(CalcJob):
         return calcinfo
 
     # pylint: disable=too-many-arguments
-    def _generate_input_parameters(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations):
+    def _generate_input_parameters(self, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations):
         parameters = copy.deepcopy(parameters)
 
-        parameters['SYSTEM_NAME'] = cls._SYSTEM_NAME
-        parameters['DATA_PATH'] = cls._DATA_PATH
+        parameters['SYSTEM_NAME'] = self._SYSTEM_NAME
+        parameters['DATA_PATH'] = self._DATA_PATH
         parameters['LEVEL_OF_STDOUT'] = 3
         parameters['LEVEL_OF_FILEOUT'] = 0
         parameters['SPECIES_NUMBER'] = len(structure.kinds)
@@ -248,7 +272,7 @@ class OpenmxCalculation(CalcJob):
             raise exceptions.InputValidationError(msg)
 
     # pylint: disable=too-many-arguments
-    def _validate_inputs(cls, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations, schema):
+    def _validate_inputs(self, structure, kpoints, parameters, pseudos, orbitals, orbital_configurations, schema):
         # A pseudopotential should be specified for each kind present in the `StructureData`
         kinds = [kind.name for kind in structure.kinds]
         if set(kinds) != set(pseudos.keys()):
@@ -310,10 +334,10 @@ class OpenmxCalculation(CalcJob):
         # Validate against the JSON schema
         validate_parameters(schema, parameters)
 
-    def _generate_local_copy_lists(cls, pseudos, orbitals):
-        pseudo_file_list = [(pseudo.uuid, pseudo.filename, os.path.join(cls._PSEUDO_SUBFOLDER, pseudo.filename))
+    def _generate_local_copy_lists(self, pseudos, orbitals):
+        pseudo_file_list = [(pseudo.uuid, pseudo.filename, os.path.join(self._PSEUDO_SUBFOLDER, pseudo.filename))
                             for pseudo in pseudos.values()]
-        orbital_file_list = [(orbital.uuid, orbital.filename, os.path.join(cls._ORBITAL_SUBFOLDER, orbital.filename))
+        orbital_file_list = [(orbital.uuid, orbital.filename, os.path.join(self._ORBITAL_SUBFOLDER, orbital.filename))
                              for orbital in orbitals.values()]
 
         return pseudo_file_list, orbital_file_list
