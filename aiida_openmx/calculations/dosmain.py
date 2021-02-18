@@ -45,7 +45,7 @@ class DosmainCalculation(CalcJob):
             help='The `RemoteData` node from a completed `OpenmxCalculation` where `DOS_FILEOUT=True`.')
         spec.input('openmx_input_structure', valid_type=orm.StructureData, required=False,
             help='The input `StructureData` used for the `OpenmxCalculation`, used if `dos_method` is `pdos`.')
-        spec.input('openmx_orbital_configurations', valid_type=orm.StructureData, required=False,
+        spec.input('openmx_orbital_configurations', valid_type=orm.ArrayData, required=False,
             help='The orbital configurations used for the `OpenmxCalculation`, used if `dos_method` is `pdos`.')
 
 
