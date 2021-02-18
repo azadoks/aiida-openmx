@@ -16,8 +16,6 @@
     ],
     "version": "0.2.0",
     "entry_points": {
-        "aiida.data": [
-        ],
         "aiida.calculations": [
             "openmx.openmx = aiida_openmx.calculations.openmx:OpenmxCalculation",
             "openmx.dosmain = aiida_openmx.calculations.dosmain:DosmainCalculation"
@@ -26,7 +24,8 @@
             "openmx.openmx = aiida_openmx.parsers.openmx:OpenmxParser",
             "openmx.dosmain = aiida_openmx.parsers.dosmain:DosmainParser"
         ],
-        "aiida.cmdline.data": [
+        "aiida.workflows": [
+            "openmx.openmx.dos = aiida_openmx.workflows.dos:DosWorkChain"
         ]
     },
     "include_package_data": true,
