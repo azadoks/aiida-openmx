@@ -16,7 +16,6 @@ fast:
     # Atoms.SpeciesAndCoordinates: [[1-based-index, symbol, x, y, z, up_charge, down_charge]]
     Atoms.UnitVectors.Unit: "Ang"  # available: ("Ang", "AU")
     # Atoms.UnitVectors:  [[u1, u2, u3]]
-
     ## SCF or Electronic System
     scf.XcType: "GGA-PBE"  # available: ("LDA", "LSDA-CA", "LSDA-PW", "GGA-PBE")
     scf.SpinPolarization: "off"  # available: ("on", "off", "nc")
