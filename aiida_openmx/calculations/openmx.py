@@ -10,7 +10,7 @@ from aiida.common import datastructures, exceptions, folders
 from aiida.common.lang import classproperty
 from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
-from aiida_pseudo.data.pseudo import PaoData
+from aiida_basis.data.basis import PaoData
 
 from aiida_openmx.utils.dict import uppercase_dict_keys, lowercase_dict_values
 from aiida_openmx.calculations.helpers.openmx import (
