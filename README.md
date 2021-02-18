@@ -7,19 +7,17 @@
 
 AiiDA plugin for the OpenMX DFT code.
 
-This plugin is the default output of the
-[AiiDA plugin cutter](https://github.com/aiidateam/aiida-plugin-cutter),
-intended to help developers get started with their AiiDA plugins.
 
 ## Installation
 
 ### `aiida-openmx`
+
 ```shell
 pip install aiida-openmx
 ```
 
-
 ### Creating pseudopotential families
+
 As `aiida-pseudo` does not have any bespoke support for OpenMX pseudopotential families at the moment, setting up pseudopotentials in AiiDA is a little more complex than running `aiida-pseudo install openmx`.
 
 Nevertheless, it is not too difficult. The general steps are:
@@ -45,6 +43,7 @@ pbe19s_family = PseudoPotentialFamily.create_from_folder(
     pseudo_type=VpsData)
 ```
 
+
 ## Development
 
 ```shell
@@ -56,6 +55,7 @@ pytest -v  # discover and run all tests
 ```
 
 See the [developer guide](http://aiida-openmx.readthedocs.io/en/latest/developer_guide/index.html) for more information.
+
 
 ## License
 
