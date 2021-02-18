@@ -7,5 +7,4 @@ User guide
 
     get_started
     tutorial
-
-
+    input_keywords

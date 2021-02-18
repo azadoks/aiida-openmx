@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """pytest fixtures for simplified testing."""
 from __future__ import absolute_import
 import pytest
@@ -11,8 +12,6 @@ def clear_database_auto(clear_database):  # pylint: disable=unused-argument
 
 @pytest.fixture(scope='function')
 def openmx_code(aiida_local_code_factory):
-    """Get a openmx code.
-    """
-    openmx_code = aiida_local_code_factory(executable='diff',
-                                           entry_point='openmx')
+    """Get an openmx code."""
+    openmx_code = aiida_local_code_factory(executable='openmx', entry_point='openmx')
     return openmx_code

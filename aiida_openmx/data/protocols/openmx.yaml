@@ -1,0 +1,51 @@
+fast:
+  parameters:
+    ## File Name
+    System.CurrentDirectory: "./"  # default: "./"
+    System.Name: "aiida"  # default: None
+    level.of.stdout: 1  # default: 1; available: (1, 2, 3)
+    level.of.fileout: 1  # default: 1; available: (0, 1, 2)
+
+    ## Definition of Atomic Species
+    # Species.Number: int
+    # Definition.of.Atomic.Species: [[symbol, pao_file, vps_file]]
+
+    ## Atoms
+    # Atoms.Number: int
+    Atoms.SpeciesAndCoordinates.Unit: "Ang"  # available: ("Ang", "AU")
+    # Atoms.SpeciesAndCoordinates: [[1-based-index, symbol, x, y, z, up_charge, down_charge]]
+    Atoms.UnitVectors.Unit: "Ang"  # available: ("Ang", "AU")
+    # Atoms.UnitVectors:  [[u1, u2, u3]]
+
+    ## SCF or Electronic System
+    scf.XcType: "GGA-PBE"  # available: ("LDA", "LSDA-CA", "LSDA-PW", "GGA-PBE")
+    scf.SpinPolarization: "off"  # available: ("on", "off", "nc")
+    scf.SpinOrbit.Coupling: "off"  # default: "off", available: ("on", "off")
+    scf.ElectronicTemperature: 300.0  # default: 300.0 [K]
+    scf.energycutoff: 150.0  # default: 150.0 [Ry]
+    scf.maxIter: 40  # default: 40
+    scf.EigenvalueSolver: "band"  # available: ("dc", "gdc", "recursion", "cluster", "band")
+    scf.lapack.dste: "dstevx"  # default: "dstevx"?, available: ("dstegr", "dstedc", "dstevx")
+    scf.Kgrid: 10 10 10  # when scf.EigenvalueSolver: "band"
+    scf.Generation.Kpoint: "regular"  # available: ("regular", "mp")
+    scf.Mixing.Type: "rmm-diisk"  # available: ("simple", "rmm-diis", "rmm-diisk", "gr-pulay", "kerker")
+    scf.Init.Mixing.Weight: 0.30  # default: 0.30
+    scf.Min.Mixing.Weight: 0.001  # default: 0.001
+    scf.Max.Mixing.Weight: 0.40  # default: 0.40
+    scf.Mixing.History: 5  # default: 5
+    scf.Mixing.StartPulay: 6  # default: 6
+    scf.Mixing.EveryPulay: 6  # default: 6
+    scf.criterion: 1.0e-6  # default: 1.0e-6 [Ha]
+
+    ## 1D FFT
+
+    ## MD or Geometry Optimization
+    # MD.Type: MOLECULAR-DYNAMICS  # available: ("nomd", "opt", "nve", "nvt_vs", "nvt_vs2", "nvt_nh")
+    # MD.Type: GEOMETRY-OPTIMIZATION  # available: ("nomd", "opt", "diis", "bfgs", "rf", "ef")
+    # MD.Type: VARIABLE-CELL G-O  # available: ("optc1", "optc2", "optc3", "optc4", "optc5", "optc6", "optc7", "rfc5", "rfc6", "rfc7")
+    MD.Type: "nomd"
+    MD.Opt.DIIS.History: 7  # default: 7
+    MD.Opt.StartDIIS: 5  # default: 5
+    MD.maxIter: 1 # default: 1
+    MD.TimeStep: 0.5  # default: 0.5 [fs]
+    MD.Opt.criterion: 1.0e-4  # default: 1.0e-4 [Ha/Bohr]
