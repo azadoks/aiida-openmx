@@ -525,11 +525,12 @@
             "default": false
         },
         "DOSGAUSS_FILEOUT": {
-            "description": "Wheter to calculate / write the DOS calculated using Gaussian smearing",
+            "description": "Whether to calculate / write the DOS calculated using Gaussian smearing",
             "type": "boolean",
             "default": false
         },
         "DOSGAUSS_NUM_MESH": {
+            "description": "Number of points with which to sample the DOS if calculated using Gaussian smearing",
             "type": "integer",
             "default": 200
         },
