@@ -11,97 +11,38 @@ This plugin is the default output of the
 [AiiDA plugin cutter](https://github.com/aiidateam/aiida-plugin-cutter),
 intended to help developers get started with their AiiDA plugins.
 
-## Repository contents
-
-* [`.github/`](.github/): [Github Actions](https://github.com/features/actions) configuration
-  * [`ci.yml`](.github/workflows/ci.yml): runs tests, checks test coverage and builds documentation at every new commit
-  * [`publish-on-pypi.yml`](.github/workflows/publish-on-pypi.yml): automatically deploy git tags to PyPI - just generate a [PyPI API token](https://pypi.org/help/#apitoken) for your PyPI account and add it to the `pypi_token` secret of your github repository
-* [`aiida_openmx/`](aiida_openmx/): The main source code of the plugin package
-  * [`data/`](aiida_openmx/data/): A new `DiffParameters` data class, used as input to the `DiffCalculation` `CalcJob` class
-  * [`calculations.py`](aiida_openmx/calculations.py): A new `DiffCalculation` `CalcJob` class
-  * [`cli.py`](aiida_openmx/cli.py): Extensions of the `verdi data` command line interface for the `DiffParameters` class
-  * [`helpers.py`](aiida_openmx/helpers.py): Helpers for setting up an AiiDA code for `diff` automatically
-  * [`parsers.py`](aiida_openmx/parsers.py): A new `Parser` for the `DiffCalculation`
-* [`docs/`](docs/): A documentation template ready for publication on [Read the Docs](http://aiida-diff.readthedocs.io/en/latest/)
-* [`examples/`](examples/): An example of how to submit a calculation using this plugin
-* [`tests/`](tests/): Basic regression tests using the [pytest](https://docs.pytest.org/en/latest/) framework (submitting a calculation, ...). Install `pip install -e .[testing]` and run `pytest`.
-* [`.coveragerc`](.coveragerc): Configuration of [coverage.py](https://coverage.readthedocs.io/en/latest) tool reporting which lines of your plugin are covered by tests
-* [`.gitignore`](.gitignore): Telling git which files to ignore
-* [`.pre-commit-config.yaml`](.pre-commit-config.yaml): Configuration of [pre-commit hooks](https://pre-commit.com/) that sanitize coding style and check for syntax errors. Enable via `pip install -e .[pre-commit] && pre-commit install`
-* [`.readthedocs.yml`](.readthedocs.yml): Configuration of documentation build for [Read the Docs](https://readthedocs.org/)
-* [`LICENSE`](LICENSE): License for your plugin
-* [`MANIFEST.in`](MANIFEST.in): Configure non-Python files to be included for publication on [PyPI](https://pypi.org/)
-* [`README.md`](README.md): This file
-* [`conftest.py`](conftest.py): Configuration of fixtures for [pytest](https://docs.pytest.org/en/latest/)
-* [`pytest.ini`](pytest.ini): Configuration of [pytest](https://docs.pytest.org/en/latest/) test discovery
-* [`setup.json`](setup.json): Plugin metadata for registration on [PyPI](https://pypi.org/) and the [AiiDA plugin registry](https://aiidateam.github.io/aiida-registry/) (including entry points)
-* [`setup.py`](setup.py): Installation script for pip / [PyPI](https://pypi.org/)
-
-
-See also the following video sequences from the 2019-05 AiiDA tutorial:
-
- * [aiida-diff setup.json](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=240s)
- * [run aiida-diff example calculation](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=403s)
- * [aiida-diff CalcJob plugin](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=685s)
- * [aiida-diff Parser plugin](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=936s)
- * [aiida-diff computer/code helpers](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1238s)
- * [aiida-diff input data (with validation)](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1353s)
- * [aiida-diff cli](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1621s)
- * [aiida-diff tests](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1931s)
- * [Adding your plugin to the registry](https://www.youtube.com/watch?v=760O2lDB-TM&t=112s)
- * [pre-commit hooks](https://www.youtube.com/watch?v=760O2lDB-TM&t=333s)
-
-For more information, see the [developer guide](https://aiida-diff.readthedocs.io/en/latest/developer_guide) of your plugin.
-
-
-## Features
-
- * Add input files using `SinglefileData`:
-   ```python
-   SinglefileData = DataFactory('singlefile')
-   inputs['file1'] = SinglefileData(file='/path/to/file1')
-   inputs['file2'] = SinglefileData(file='/path/to/file2')
-   ```
-
- * Specify command line options via a python dictionary and `DiffParameters`:
-   ```python
-   d = { 'ignore-case': True }
-   DiffParameters = DataFactory('openmx')
-   inputs['parameters'] = DiffParameters(dict=d)
-   ```
-
- * `DiffParameters` dictionaries are validated using [voluptuous](https://github.com/alecthomas/voluptuous).
-   Find out about supported options:
-   ```python
-   DiffParameters = DataFactory('openmx')
-   print(DiffParameters.schema.schema)
-   ```
-
 ## Installation
 
+### `aiida-openmx`
 ```shell
 pip install aiida-openmx
-verdi quicksetup  # better to set up a new profile
-verdi plugin list aiida.calculations  # should now show your calclulation plugins
 ```
 
 
-## Usage
+### Creating pseudopotential families
+As `aiida-pseudo` does not have any bespoke support for OpenMX pseudopotential families at the moment, setting up pseudopotentials in AiiDA is a little more complex than running `aiida-pseudo install openmx`.
 
-Here goes a complete example of how to submit a test calculation using this plugin.
+Nevertheless, it is not too difficult. The general steps are:
+1. Make a directory with the pseudos you would like to have in a family
+2. Create a `PseudoPotentialFamily` in the `verdi shell` from that directory
 
-A quick demo of how to submit a calculation:
+For example, to install the PBE19 pseudopotentials with the 'S' variants for elements like Co and Fe, one could do the following, replacing `${OPENMX_SOURCE}` with the path to your extracted OpenMX source directory or setting the environment variable `OPENMX_SOURCE` before running these commands:
 ```shell
-verdi daemon start     # make sure the daemon is running
-cd examples
-./example_01.py        # run test calculation
-verdi process list -a  # check record of calculation
+mkdir PBE19S
+cp ${OPENMX_SOURCE}/DFT_DATA19/VPS/*PBE19.vps PBE19S
+cp ${OPENMX_SOURCE}/DFT_DATA19/VPS/*PBE19S.vps PBE19S
 ```
 
-The plugin also includes verdi commands to inspect its data types:
-```shell
-verdi data openmx list
-verdi data openmx export <PK>
+Once you have placed the desired VPS pseudopotentials in a directory, run the following (or similar) from `verdi shell`
+
+```python
+from aiida_pseudo.groups.family import PseudoPotentialFamily
+from aiida_pseudo.data.pseudo.vps import VpsData
+pbe19s_family = PseudoPotentialFamily.create_from_folder(
+    dirpath='PBE19S/',
+    label='OpenMX/19/PBE/S',
+    description='OpenMX PBE19(S)',
+    pseudo_type=VpsData)
 ```
 
 ## Development
@@ -109,7 +50,7 @@ verdi data openmx export <PK>
 ```shell
 git clone https://github.com/zooks97/aiida-openmx .
 cd aiida-openmx
-pip install -e .[pre-commit,testing]  # install extra dependencies
+pip install -e .[pre-commit,testing,docs]  # install extra dependencies
 pre-commit install  # install pre-commit hooks
 pytest -v  # discover and run all tests
 ```
