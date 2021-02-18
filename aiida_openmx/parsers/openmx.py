@@ -113,7 +113,7 @@ class OpenmxParser(Parser):
             - fractional coordinates of final structure
             - computational timings
         """
-        filename = self.node.get_option('output_filename')
+        filename = self.node.process_class.output_filename
 
         if filename not in self.retrieved.list_object_names():
             return self.exit_codes.ERROR_OUTPUT_STDOUT_MISSING

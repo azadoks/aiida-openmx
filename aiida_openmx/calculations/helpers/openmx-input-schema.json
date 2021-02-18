@@ -3,16 +3,16 @@
     "name": "aiida_openmx_parameters",
     "description": "JSON for describing the input parameters to OpenMX",
     "version": "0.1.0",
-    "required": [ "Species_Number", "Atoms_Number", "Definition_of_Atomic_Species", "Atoms_SpeciesAndCoordinates",
-        "Atoms_Unitvectors", "scf_EigenvalueSolver" ],
+    "required": [ "SPECIES_NUMBER", "ATOMS_NUMBER", "DEFINITION_OF_ATOMIC_SPECIES", "ATOMS_SPECIESANDCOORDINATES",
+        "ATOMS_UNITVECTORS", "SCF_EIGENVALUESOLVER" ],
     "type": "object",
     "properties": {
-        "System_CurrrentDirectory": {
+        "SYSTEM_CURRRENTDIRECTORY": {
             "description": "",
             "type": "string",
             "default": "./"
         },
-        "System_Name": {
+        "SYSTEM_NAME": {
             "description": "Name of the calculation used for the output files",
             "type": "string",
             "default": "default"
@@ -22,27 +22,27 @@
             "type": "string",
             "default": "./"
         },
-        "level_of_stdout": {
+        "LEVEL_OF_STDOUT": {
             "description": "Level of verbosity of printing to stdout",
             "type": "integer",
             "default": 1,
             "minimum": 0,
             "maximum": 3
         },
-        "level_of_fileout": {
+        "LEVEL_OF_FILEOUT": {
             "description": "Amount of information written to output files",
             "type": "integer",
             "default": 1,
             "minimum": 0,
             "maximum": 3
         },
-        "scf_energycutoff": {
+        "SCF_ENERGYCUTOFF": {
             "description": "Cutoff energy in Rydberg used in the calculation of the difference in Coulomb potential and exchange-correlation potential and in the solution of Poisson's equation using the fast Fourier Transform",
             "type": "number",
             "default": 150,
             "exclusiveMinimum": 0
         },
-        "scf_Ngrid": {
+        "SCF_NGRID": {
             "description": "Number of grids to discretize the a-, b-, and c-axes instead of deriving the grid from 'scf_energycutoff'",
             "type": "array",
             "items": {
@@ -52,12 +52,12 @@
             "minItems": 3,
             "maxItems": 3
         },
-        "Species_Number": {
+        "SPECIES_NUMBER": {
             "description": "Number of unique species in the system",
             "type": "integer",
             "exclusiveMinimum": 0
         },
-        "Definition_of_Atomic_Species": {
+        "DEFINITION_OF_ATOMIC_SPECIES": {
             "description": "Names, PAO bases, and pseudopotentials for each species in the system",
             "type": "object",
             "additionalProperties": false,
@@ -66,13 +66,19 @@
                     "description": "PAO basis and pseudopotential for a single species in the system",
                     "type": "object",
                     "additionalProperties": false,
-                    "required": [ "pao", "pseudo" ],
+                    "required": [
+                        "pao",
+                        "pseudo"
+                    ],
                     "properties": {
                         "pao": {
                             "description": "PAO basis information for this species",
                             "type": "object",
                             "additionalProperties": false,
-                            "required": [ "file_stem", "orbital_configuration" ],
+                            "required": [
+                                "file_stem",
+                                "orbital_configuration"
+                            ],
                             "properties": {
                                 "file_stem": {
                                     "description": "File name stem [ e.g. H7.0.pao -> H7.0 ] for the PAO file for this basis",
@@ -98,45 +104,77 @@
                 }
             }
         },
-        "MD_Type": {
+        "MD_TYPE": {
             "description": "Type of molecular dynamics or geometry optimization to perform",
             "type": "string",
-            "enum": [ "NOMD", "NVE", "NVT_VS", "Opt", "EF", "BFGS", "RF", "DIIS",
-                "NVT_NH", "Opt_LBFGS", "NVT_VS2", "EvsLC", "NEB", "NVT_VS4",
-                "NVT_Langevin", "DF", "OptC1", "OptC2", "OptC3", "OptC4", "OptC5",
-                "RFC1", "RFC2", "RFC3", "RFC4", "RFC5", "NPT_VS_PR", "NPT_VS_WV",
-                "NPT_NH_PR", "NPT_NH_WV", "RFC6", "RFC7", "OptC6", "OptC7" ]
+            "default": "nomd",
+            "enum": [
+                "nomd",
+                "nve",
+                "nvt_vs",
+                "opt",
+                "ef",
+                "bfgs",
+                "rf",
+                "diis",
+                "nvt_nh",
+                "opt_lbfgs",
+                "nvt_vs2",
+                "evslc",
+                "neb",
+                "nvt_vs4",
+                "nvt_langevin",
+                "df",
+                "optc1",
+                "optc2",
+                "optc3",
+                "optc4",
+                "optc5",
+                "rfc1",
+                "rfc2",
+                "rfc3",
+                "rfc4",
+                "rfc5",
+                "npt_vs_pr",
+                "npt_vs_wv",
+                "npt_nh_pr",
+                "npt_nh_wv",
+                "rfc6",
+                "rfc7",
+                "optc6",
+                "optc7"
+            ]
         },
-        "MD_maxIter": {
+        "MD_MAXITER": {
             "description": "Maximum number of iterations of the molecular dynamics or geometry optimization",
             "type": "integer",
             "exclusiveMinimum": 0
         },
-        "MD_TimeStep": {
+        "MD_TIMESTEP": {
             "description": "Time step for molecular dynamics in femtoseconds",
             "type": "number",
             "default": 0.5,
             "exclusiveMinimum": 0
         },
-        "MD_Opt_criterion": {
+        "MD_OPT_CRITERION": {
             "description": "Convergence criterion in Hartree / Bohr for molecular dynamics or geometry optimization",
             "type": "number",
             "default": 0.0003,
             "exclusiveMinimum": 0
         },
-        "MD_Opt_DIIS_History": {
+        "MD_OPT_DIIS_HISTORY": {
             "description": "Number of previous steps used to estimate the optimized structure in a 'DIIS', 'EF', or 'RF' geometry optimization",
             "type": "integer",
             "default": 3,
             "minimum": 0,
             "maximum": 19
         },
-        "MD_Opt_StartDIIS": {
+        "MD_OPT_STARTDIIS": {
             "description": "Geometry optimization step at which 'DIIS', 'EF', or 'RF' starts",
             "type": "integer",
             "default": 5
         },
-        "MD_Fixed_XYZ": {
+        "MD_FIXED_XYZ": {
             "$comment": "Unsure whether to use boolean or integer with (0,1) limits",
             "description": "Components of each atoms' position to be fixed during molecular dynamics or geometry optimization",
             "type": "array",
@@ -149,44 +187,67 @@
                 "maxItems": 3
             }
         },
-        "scf_EigenvalueSolver": {
+        "SCF_EIGENVALUESOLVER": {
             "description": "Method for solving the Hamiltonian eigenvalue problem",
             "type": "string",
-            "default": "Band",
-            "enum": [ "Cluster", "Band", "NEGF", "DC", "Cluster-DIIS",
-                "Krylov", "Cluster2", "EGAC", "DC-LNO", "Cluster-LNO" ]
+            "default": "band",
+            "enum": [
+                "cluster",
+                "band",
+                "negf",
+                "dc",
+                "cluster-diis",
+                "krylov",
+                "cluster2",
+                "egac",
+                "dc-lno",
+                "cluster-lno"
+            ]
         },
-        "scf_Generation_Kpoint": {
+        "SCF_GENERATION_KPOINT": {
             "description": "Method for generating the k-point grid",
             "type": "string",
-            "default": "REGULAR",
-            "enum": [ "REGULAR", "MP" ]
+            "default": "regular",
+            "enum": [
+                "regular",
+                "mp"
+            ]
         },
-        "scf_XcType": {
+        "SCF_XCTYPE": {
             "description": "Type of exchange-correlation functional",
             "type": "string",
-            "default": "LDA",
-            "enum": [ "LDA", "LSDA-CA", "LSDA-PW", "GGA-PBE", "EXX-TEST" ]
+            "default": "lda",
+            "enum": [
+                "lda",
+                "lsda-ca",
+                "lsda-pw",
+                "gga-pbe",
+                "exx-test"
+            ]
         },
-        "scf_SpinPolarization": {
+        "SCF_SPINPOLARIZATION": {
             "description": "Whether to apply spin-polarization",
             "type": "boolean",
             "default": false
         },
-        "scf_SpinOrbit_Coupling": {
+        "SCF_SPINORBIT_COUPLING": {
             "description": "Whether to apply spin-orbit coupling",
             "type": "boolean",
             "default": false
         },
-        "scf_partialCoreCorrection": {
+        "SCF_PARTIALCORECORRECTION": {
             "description": "Whether to apply partial core correction (PCC) in calclating the exchange-correlation energy",
             "type": "boolean",
             "default": false
         },
-        "scf_Kgrid": {
+        "SCF_KGRID": {
             "description": "Number of k-points along each reciprocal lattice vector",
             "type": "array",
-            "default": [ 4, 4, 4 ],
+            "default": [
+                4,
+                4,
+                4
+            ],
             "items": {
                 "type": "integer",
                 "exclusiveMinimum": 0
@@ -194,89 +255,111 @@
             "minItems": 3,
             "maxItems": 3
         },
-        "scf_Electric_Field": {
+        "SCF_ELECTRIC_FIELD": {
             "description": "The electric field in GV/m",
             "type": "array",
-            "default": [ 0, 0, 0 ],
+            "default": [
+                0,
+                0,
+                0
+            ],
             "items": {
                 "type": "number"
             },
             "minItems": 3,
             "maxItems": 3
         },
-        "scf_ElectronicTemperature": {
+        "SCF_ELECTRONICTEMPERATURE": {
             "description": "Electronic temperature in Kelvin",
             "type": "number",
             "default": 300,
             "minimum": 0
         },
-        "scf_Mixing_Type": {
+        "SCF_MIXING_TYPE": {
             "description": "Method for mixing the electron density or density matrix",
             "type": "string",
-            "default": "Simple",
-            "enum": [ "Simple", "RMM-DIIS", "GR-Pulay", "Kerker", "RMM-DIISK", "RMM-DIISH", "RMM-ADIIS", "RMM-DIISV" ]
+            "default": "simple",
+            "enum": [
+                "simple",
+                "rmm-diis",
+                "gr-pulay",
+                "kerker",
+                "rmm-diisk",
+                "rmm-diish",
+                "rmm-adiis",
+                "rmm-diisv"
+            ]
         },
-        "scf_Init_Mixing_Weight": {
+        "SCF_INIT_MIXING_WEIGHT": {
             "description": "Initial mixing weight used by 'Simple', 'RMM-DIIS', 'GR-Pulay', 'Kerker', 'RMM-DIISK', 'RMM-DIISV', and 'RMM-DIISH' mixing methods",
             "type": "number",
             "default": 0.3,
             "exclusiveMinimum": 0,
             "exclusiveMaximum": 1
         },
-        "scf_Min_Mixing_Weight": {
+        "SCF_MIN_MIXING_WEIGHT": {
             "description": "Lower limit of mixing weight for 'Simple' and 'Kerker' mixing methods",
             "type": "number",
             "default": 0.001,
             "exclusiveMinimum": 0,
             "exclusiveMaximum": 1
         },
-        "scf_Max_Mixing_Weight": {
+        "SCF_MAX_MIXING_WEIGHT": {
             "description": "Upper limit of mixing weight for 'Simple' and 'Kerker' mixing methods",
             "type": "number",
             "default": 0.4,
             "exclusiveMinimum": 0,
             "exclusiveMaximum": 1
         },
-        "scf_Mixing_History": {
+        "SCF_MIXING_HISTORY": {
             "description": "Number of previous SCF steps used for mixing",
             "type": "integer",
             "default": 5,
             "minimum": 0
         },
-        "scf_Mixing_StartPulay": {
+        "SCF_MIXING_STARTPULAY": {
             "description": "SCF step at which the 'GR-Pula' and 'RMM-DIIS*' methods begin mixing",
             "type": "integer",
             "default": 6
         },
-        "scf_Mixing_EveryPulay": {
+        "SCF_MIXING_EVERYPULAY": {
             "description": "Frequency of Pulay mixing steps during 'RMM-DIISK' mixing",
             "type": "integer",
             "default": 5
         },
-        "scf_criterion": {
+        "SCF_CRITERION": {
             "description": "Convergence criteria in Hartree on dUele for self-consistency",
             "type": "number",
-            "default": 1e-6,
+            "default": 1e-06,
             "exclusiveMinimum": 0
         },
-        "Atoms_Number": {
+        "ATOMS_NUMBER": {
             "description": "Number of atoms in the system",
             "type": "integer",
             "exclusiveMinimum": 0
         },
-        "Atoms_SpeciesAndCoordinates_Unit": {
+        "ATOMS_SPECIESANDCOORDINATES_UNIT": {
             "description": "Units of the atomic coordinates",
             "type": "string",
-            "default": "Ang",
-            "enum": [ "Ang", "AU", "FRAC" ]
+            "default": "ang",
+            "enum": [
+                "ang",
+                "au",
+                "frac"
+            ]
         },
-        "Atoms_SpeciesAndCoordinates": {
+        "ATOMS_SPECIESANDCOORDINATES": {
             "description": "Species, coordinates, and up- and down-charges of the atoms in the system",
             "type": "array",
             "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [ "specie", "coords", "up_charge", "down_charge" ],
+                "required": [
+                    "specie",
+                    "coords",
+                    "up_charge",
+                    "down_charge"
+                ],
                 "properties": {
                     "specie": {
                         "type": "string"
@@ -299,13 +382,16 @@
                 }
             }
         },
-        "Atoms_Unitvectors_Unit": {
+        "ATOMS_UNITVECTORS_UNIT": {
             "description": "Units of the unit cell vectors",
             "type": "string",
-            "default": "Ang",
-            "enum": [ "Ang", "AU" ]
+            "default": "ang",
+            "enum": [
+                "ang",
+                "au"
+            ]
         },
-        "Atoms_Unitvectors": {
+        "ATOMS_UNITVECTORS": {
             "description": "Unit cell vectors",
             "type": "array",
             "items": {
@@ -319,40 +405,45 @@
             "minItems": 3,
             "maxItems": 3
         },
-        "scf_maxIter": {
+        "SCF_MAXITER": {
             "description": "Maximum iterations of the self-consistency algorithm",
             "type": "integer",
             "default": 40,
             "exclusiveMinimum": 0
         },
-        "Atoms_NetCharge": {
+        "ATOMS_NETCHARGE": {
             "description": "Net charge in electron charges of the system",
             "type": "number",
             "default": 0
         },
-        "scf_restart": {
+        "SCF_RESTART": {
             "description": "Restart type",
             "type": "string",
             "default": "off",
-            "enum": [ "off", "alloff", "on", "c2n" ]
+            "enum": [
+                "off",
+                "alloff",
+                "on",
+                "c2n"
+            ]
         },
-        "scf_restart_filename": {
+        "SCF_RESTART_FILENAME": {
             "description": "System_Name of the calculation output files to use for restarting",
             "type": "string",
             "default": "default"
         },
-        "Band_dispersion": {
+        "BAND_DISPERSION": {
             "description": "Toggle for band dispersion output",
             "type": "boolean",
             "default": false
         },
-        "Band_Nkpath": {
+        "BAND_NKPATH": {
             "description": "Number of k-points in the band dispersion path",
             "type": "integer",
             "default": 0,
             "minimum": 0
         },
-        "Band_KPath_UnitCell": {
+        "BAND_KPATH_UNITCELL": {
             "description": "Unit cell for band dispersion",
             "type": "array",
             "items": {
@@ -366,13 +457,19 @@
             "minItems": 3,
             "maxItems": 3
         },
-        "Band_kpath": {
+        "BAND_KPATH": {
             "description": "k-point path for band dispersion",
             "type": "array",
             "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [ "grid_points", "k_start", "k_stop", "name_start", "name_stop" ],
+                "required": [
+                    "grid_points",
+                    "k_start",
+                    "k_stop",
+                    "name_start",
+                    "name_stop"
+                ],
                 "parameters": {
                     "grid_points": {
                         "type": "integer",
@@ -407,54 +504,61 @@
                 }
             }
         },
-        "1DFFT_NumGridK": {
+        "1DFFT_NUMGRIDK": {
             "description": "Number of k-space radial grids for the radial functions of PAOs and projectors of non-local potentials",
             "type": "integer",
             "default": 900
         },
-        "1DFFT_EnergyCutoff": {
+        "1DFFT_ENERGYCUTOFF": {
             "description": "Energy range in Rydberg for tabulating the radial functions of PAOs and projectors of non-local potentials",
             "type": "number",
             "default": 3600
         },
-        "1DFFT_NumGridR": {
+        "1DFFT_NUMGRIDR": {
             "description": "Number of radial grids in real-space used for numerical integrations of the radial functions of PAOs and projectors of non-local potentials",
             "type": "integer",
             "default": 900
         },
-        "Dos_fileout": {
+        "DOS_FILEOUT": {
             "description": "Whether to calculate / write the DOS calculated using tetrahedron integration",
             "type": "boolean",
             "default": false
         },
-        "DosGauss_fileout": {
+        "DOSGAUSS_FILEOUT": {
             "description": "Wheter to calculate / write the DOS calculated using Gaussian smearing",
             "type": "boolean",
             "default": false
         },
-        "DosGauss_Num_Mesh": {
+        "DOSGAUSS_NUM_MESH": {
             "type": "integer",
             "default": 200
         },
-        "DosGauss_Width": {
+        "DOSGAUSS_WIDTH": {
             "description": "Width in electron-Volts of Gaussians for smearing the DOS",
             "type": "boolean",
             "default": 0.2
         },
-        "Dos_Erange": {
+        "DOS_ERANGE": {
             "description": "Minimum and maximum energies in electron-Volts for the DOS",
             "type": "array",
-            "default": [ -20, 20 ],
+            "default": [
+                -20,
+                20
+            ],
             "items": {
                 "type": "number"
             },
-            "minItems": 3,
-            "maxItems": 3
+            "minItems": 2,
+            "maxItems": 2
         },
-        "Dos_Kgrid": {
+        "DOS_KGRID": {
             "description": "k-point grid for tetrahedron integration of the DOS",
             "type": "array",
-            "default": [ 4, 4, 4 ],
+            "default": [
+                4,
+                4,
+                4
+            ],
             "items": {
                 "type": "integer",
                 "exclusiveMinimum": 0
@@ -462,12 +566,12 @@
             "minItems": 3,
             "maxItems": 3
         },
-        "HS_fileout": {
+        "HS_FILEOUT": {
             "description": "Whether to write a file containing the Hamiltonaian matrices",
             "type": "boolean",
             "default": false
         },
-        "scf_stress_tensor": {
+        "SCF_STRESS_TENSOR": {
             "description": "Whether to write the stress tensor to standard output",
             "type": "boolean",
             "default": false

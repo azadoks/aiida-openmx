@@ -12,8 +12,8 @@ from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
 from aiida_pseudo.data.pseudo import PaoData
 
-from aiida_openmx.utils._dict import _uppercase_dict_keys, _lowercase_dict_values
-from aiida_openmx.utils.openmx.input import (
+from aiida_openmx.utils.dict import uppercase_dict_keys, lowercase_dict_values
+from aiida_openmx.calculations.helpers.openmx import (
     _RESERVED_KEYWORDS, _get_atoms_spec_and_coords, _get_def_atomic_species, _get_xc_type, write_input_file,
     validate_parameters
 )
@@ -30,7 +30,7 @@ class OpenmxCalculation(CalcJob):
     _SYSTEM_NAME = 'aiida'
     _INPUT_FILE = _SYSTEM_NAME + '.in'
     _OUTPUT_FILE = _SYSTEM_NAME + '.out'
-    _INPUT_SCHEMA = os.path.join(_DIR, '../schema/openmx-input-schema-upper.json')
+    _INPUT_SCHEMA = os.path.join(_DIR, 'helpers/openmx-input-schema.json')
 
     _DATAFILE_DOS_VAL_FILE = _SYSTEM_NAME + '.Dos.val'
     _DATAFILE_DOS_VEC_FILE = _SYSTEM_NAME + '.Dos.vec'
@@ -49,6 +49,12 @@ class OpenmxCalculation(CalcJob):
         """Return the system name."""
         # pylint: disable=no-self-argument
         return cls._SYSTEM_NAME
+
+    @classproperty
+    def output_filename(cls):
+        """Return the stdout output filename."""
+        # pylint: disable=no-self-argument
+        return cls._OUTPUT_FILE
 
     @classproperty
     def dos_filenames(cls):
@@ -170,12 +176,12 @@ class OpenmxCalculation(CalcJob):
 
         # Get an uppercase-key-only version of the settings dictionary (also check for case-insensitive duplicates)
         if 'settings' in self.inputs:
-            settings = _uppercase_dict_keys(self.inputs.settings.get_dict(), dict_name='settings')
+            settings = uppercase_dict_keys(self.inputs.settings.get_dict(), dict_name='settings')
         else:
             settings = {}
 
         # Get an uppercase-key-only verion of the parameters dictionary (also check for case-insensitive duplicates)
-        parameters = _uppercase_dict_keys(self.inputs.parameters.get_dict(), dict_name='parameters')
+        parameters = uppercase_dict_keys(self.inputs.parameters.get_dict(), dict_name='parameters')
 
         # No reserved parameter keywords should be provided
         self._check_reserved_keywords(parameters)
@@ -191,7 +197,7 @@ class OpenmxCalculation(CalcJob):
         )
 
         # Get a lowercase-value-only version of the parameters dictionary
-        parameters = _lowercase_dict_values(parameters)
+        parameters = lowercase_dict_values(parameters)
 
         # Validate input parameters
         self._validate_inputs(
