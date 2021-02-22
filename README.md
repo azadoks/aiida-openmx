@@ -16,10 +16,6 @@ AiiDA plugin for the OpenMX DFT code.
 pip install aiida-openmx
 ```
 
-### Setting up some `code`s
-
-
-
 ### Pseudopotential families and basis sets
 
 To simplify the use of pseudopotentials and orbital bases in `aiida-openmx`, `aiida-pseudo` and `aiida-basis` have support for OpenMX's VPS pseudopotential and PAO pseudoatomic orbital formats respectively.
