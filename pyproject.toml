@@ -19,5 +19,18 @@ good-names = [
     'StructureData',
     'PaoData',
     'VpsData',
-    'OpenmxCalculation'
+    'OpenmxCalculation',
+    'DosmainCalculation'
+]
+
+[tool.pytest.ini_options]
+minversion = '6.0'
+testpaths = [
+    'tests'
+]
+filterwarnings = [
+    'ignore::DeprecationWarning:frozendict:',
+    'ignore::DeprecationWarning:pkg_resources:',
+    'ignore::DeprecationWarning:reentry:',
+    'ignore::DeprecationWarning:sqlalchemy_utils:'
 ]

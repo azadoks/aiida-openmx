@@ -126,6 +126,7 @@ Co:
   - 0
   rcut: 6.0
   valence: 15
+  type: S
 Cr:
   config:
   - 2
@@ -150,6 +151,7 @@ Cu:
   - 0
   rcut: 6.0
   valence: 11
+  type: S
 Dy:
   config:
   - 3
@@ -174,6 +176,7 @@ Fe:
   - 0
   rcut: 6.0
   valence: 14
+  type: S
 Ga:
   config:
   - 2
@@ -366,6 +369,7 @@ Ni:
   - 0
   rcut: 6.0
   valence: 16
+  type: S
 O:
   config:
   - 2
@@ -406,22 +410,22 @@ Pd:
   - 0
   rcut: 7.0
   valence: 16
-Pm:
-  config:
-  - 3
-  - 2
-  - 1
-  - 1
-  rcut: 8.0
-  valence: 15
-Pr:
-  config:
-  - 3
-  - 2
-  - 1
-  - 1
-  rcut: 8.0
-  valence: 13
+# Pm:
+#   config:
+#   - 3
+#   - 2
+#   - 1
+#   - 1
+#   rcut: 8.0
+#   valence: 15
+# Pr:
+#   config:
+#   - 3
+#   - 2
+#   - 1
+#   - 1
+#   rcut: 8.0
+#   valence: 13
 Pt:
   config:
   - 3
@@ -606,6 +610,7 @@ Zn:
   - 0
   rcut: 6.0
   valence: 12
+  type: S
 Zr:
   config:
   - 3

@@ -10,7 +10,7 @@ from aiida.common import datastructures, exceptions, folders
 from aiida.common.lang import classproperty
 from aiida.engine import CalcJob
 from aiida_pseudo.data.pseudo import VpsData
-from aiida_pseudo.data.pseudo import PaoData
+from aiida_basis.data.basis import PaoData
 
 from aiida_openmx.utils.dict import uppercase_dict_keys, lowercase_dict_values
 from aiida_openmx.calculations.helpers.openmx import (
@@ -94,6 +94,7 @@ class OpenmxCalculation(CalcJob):
         ## Inputs
         # Metadata
         spec.input('metadata.options.parser_name', valid_type=str, default=cls._DEFAULT_PARSER_NAME)
+        # spec.input('metadata.options.withmpi', valid_type=bool, default=True)
         spec.input('metadata.options.resources', valid_type=dict,
             default={'num_machines': 1, 'num_mpiprocs_per_machine': 1})
         # Pure inputs
@@ -229,7 +230,7 @@ class OpenmxCalculation(CalcJob):
         # Fill out the `CodeInfo`
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
-        codeinfo.with_mpi = True
+        codeinfo.withmpi = True
         codeinfo.cmdline_params = ([self._INPUT_FILE] + list(settings.pop('CMDLINE', [])))
         codeinfo.stdout_name = self._OUTPUT_FILE
 
