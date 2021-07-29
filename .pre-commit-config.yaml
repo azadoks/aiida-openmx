@@ -4,7 +4,7 @@
 # yapf = yet another python formatter
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.5.0
+  rev: v4.0.1
   hooks:
   -   id: double-quote-string-fixer
   -   id: end-of-file-fixer
@@ -18,7 +18,7 @@ repos:
           )$
 
 - repo: https://github.com/PyCQA/pydocstyle
-  rev: 5.0.2
+  rev: 6.1.1
   hooks:
   - id: pydocstyle
     exclude: &exclude_files >
@@ -36,19 +36,3 @@ repos:
   - id: yapf
     name: yapf
     args: ["-i"]
-
-- repo: local
-  hooks:
-  # prospector: collection of linters
-  - id: prospector
-    language: system
-    types: [file, python]
-    name: prospector
-    description: "This hook runs Prospector: https://github.com/landscapeio/prospector"
-    entry: prospector
-
-  - id: version-number
-    name: Check version numbers
-    entry: python ./.github/check_version.py
-    language: system
-    files: '^(setup.json)|(aiida_openmx/__init__.py)'
